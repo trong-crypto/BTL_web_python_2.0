@@ -1,0 +1,12 @@
+{% extends 'core/base.html' %}
+{% block content %}
+  <h2>Gán vai trò cho {{ user_obj.username }}</h2>
+  <form method="post">{% csrf_token %}
+    <label>Chọn vai trò</label>
+    <select name="role">
+      <option value="User">User</option>
+      <option value="Admin">Admin</option>
+    </select>
+    <button type="submit">Lưu</button>
+  </form>
+{% endblock %}

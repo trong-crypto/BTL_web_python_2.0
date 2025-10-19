@@ -1,0 +1,40 @@
+{% extends 'core/base.html' %}
+{% block content %}
+  <h2>Dashboard tổng quan</h2>
+  <div class="row">
+    <div class="col-sm-4">
+      <div class="card">
+        <h4>Tổng số tài sản</h4>
+        <p>{{ total_assets }}</p>
+      </div>
+    </div>
+    <div class="col-sm-4">
+      <div class="card">
+        <h4>Tài sản đang bảo trì</h4>
+        <p>{{ assets_maint }}</p>
+      </div>
+    </div>
+    <div class="col-sm-4">
+      <div class="card">
+        <h4>Yêu cầu đang chờ</h4>
+        <p>{{ pending_requests }}</p>
+      </div>
+    </div>
+  </div>
+
+  <h3>Tỷ lệ tài sản theo trạng thái</h3>
+  <canvas id="statusChart" width="400" height="200"></canvas>
+
+  <script>
+    const data = {
+      labels: ['Sẵn sàng','Đang bảo trì','Đã hỏng'],
+      datasets: [{
+        data: [{{ status_counts.ready }}, {{ status_counts.maint }}, {{ status_counts.broken }}],
+        backgroundColor: ['#4caf50','#ff9800','#f44336'],
+      }]
+    };
+    const ctx = document.getElementById('statusChart').getContext('2d');
+    new Chart(ctx, { type: 'pie', data: data });
+  </script>
+
+{% endblock %}

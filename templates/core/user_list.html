@@ -1,0 +1,17 @@
+{% extends 'core/base.html' %}
+{% block content %}
+  <h2>Quản lý người dùng</h2>
+  <table>
+    <thead><tr><th>Username</th><th>Email</th><th>Vai trò</th><th>Hành động</th></tr></thead>
+    <tbody>
+      {% for u in users %}
+        <tr>
+          <td>{{ u.username }}</td>
+          <td>{{ u.email }}</td>
+          <td>{% if u.is_superuser %}Admin{% else %}User{% endif %}</td>
+          <td><a href="{% url 'assign_role' u.pk %}">Gán vai trò</a></td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

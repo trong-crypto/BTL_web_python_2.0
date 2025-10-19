@@ -1,0 +1,10 @@
+{% extends 'core/base.html' %}
+{% block content %}
+  <h2>Cập nhật yêu cầu #{{ req.id }}</h2>
+  <p>Tài sản: {{ req.asset }}</p>
+  <p>Mô tả: {{ req.description }}</p>
+  <form method="post">{% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Lưu</button>
+  </form>
+{% endblock %}

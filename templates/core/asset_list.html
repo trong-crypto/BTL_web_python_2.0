@@ -1,0 +1,30 @@
+{% extends 'core/base.html' %}
+{% block content %}
+  <h2>Danh sách tài sản</h2>
+  {% if user.is_superuser %}
+    <a class="button" href="{% url 'asset_create' %}">Thêm tài sản</a>
+  {% endif %}
+  <table>
+    <thead>
+      <tr><th>Mã</th><th>Tên</th><th>Vị trí</th><th>Trạng thái</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for a in assets %}
+        <tr>
+          <td>{{ a.code }}</td>
+          <td>{{ a.name }}</td>
+          <td>{{ a.location }}</td>
+          <td>{{ a.get_status_display }}</td>
+          <td>
+            {% if user.is_superuser %}
+              <a href="{% url 'asset_edit' a.pk %}">Sửa</a> |
+              <a href="{% url 'asset_delete' a.pk %}">Xóa</a>
+            {% endif %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="5">Không có tài sản</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

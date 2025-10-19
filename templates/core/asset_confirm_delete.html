@@ -1,0 +1,9 @@
+{% extends 'core/base.html' %}
+{% block content %}
+  <h2>Xác nhận xóa</h2>
+  <p>Bạn có chắc muốn xóa tài sản: <strong>{{ asset }}</strong> ?</p>
+  <form method="post">{% csrf_token %}
+    <button type="submit">Xóa</button>
+    <a href="{% url 'asset_list' %}">Hủy</a>
+  </form>
+{% endblock %}

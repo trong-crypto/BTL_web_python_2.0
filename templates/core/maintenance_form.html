@@ -1,0 +1,8 @@
+{% extends 'core/base.html' %}
+{% block content %}
+  <h2>Tạo yêu cầu bảo trì</h2>
+  <form method="post">{% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Gửi</button>
+  </form>
+{% endblock %}
