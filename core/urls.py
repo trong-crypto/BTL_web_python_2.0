@@ -1,15 +1,33 @@
 from django.urls import path
 from . import views
+from django.views.generic.base import RedirectView
 
 urlpatterns = [
     path('', views.dashboard, name='dashboard'),
-    path('assets/', views.asset_list, name='asset_list'),
-    path('assets/create/', views.asset_create, name='asset_create'),
-    path('assets/<int:pk>/edit/', views.asset_edit, name='asset_edit'),
-    path('assets/<int:pk>/delete/', views.asset_delete, name='asset_delete'),
+    path('buildings/', views.building_list, name='building_list'),
+    path('buildings/create/', views.building_create, name='building_create'),
+    path('buildings/<int:pk>/edit/', views.building_edit, name='building_edit'),
+    path('buildings/<int:pk>/delete/', views.building_delete, name='building_delete'),
+    path('assets/', RedirectView.as_view(url='/buildings/', permanent=True)),
+    path('buildings/<int:pk>/', views.building_detail, name='building_detail'),
+    path('buildings/<int:building_pk>/floors/create/', views.floor_create, name='floor_create'),
+    path('floors/<int:pk>/edit/', views.floor_edit, name='floor_edit'),
+    path('floors/<int:pk>/delete/', views.floor_delete, name='floor_delete'),
+    path('floors/<int:floor_pk>/rooms/', views.room_list, name='room_list'),
+    path('floors/<int:floor_pk>/rooms/create/', views.room_create, name='room_create'),
+    path('rooms/<int:pk>/edit/', views.room_edit, name='room_edit'),
+    path('rooms/<int:pk>/delete/', views.room_delete, name='room_delete'),
+    path('rooms/<int:room_pk>/equipments/', views.equipment_list, name='equipment_list'),
+    path('rooms/<int:room_pk>/equipments/create/', views.equipment_create, name='equipment_create'),
+    path('equipments/<int:pk>/edit/', views.equipment_edit, name='equipment_edit'),
+    path('equipments/<int:pk>/delete/', views.equipment_delete, name='equipment_delete'),
     path('maintenance/create/', views.maintenance_create, name='maintenance_create'),
     path('maintenance/', views.maintenance_list, name='maintenance_list'),
     path('maintenance/<int:pk>/update/', views.maintenance_update, name='maintenance_update'),
+    # API endpoints for dependent selects
+    path('api/floors/', views.api_floors, name='api_floors'),
+    path('api/rooms/', views.api_rooms, name='api_rooms'),
+    path('api/equipments/', views.api_equipments, name='api_equipments'),
     path('register/', views.register, name='register'),
     path('users/', views.user_list, name='user_list'),
     path('users/<int:user_id>/assign/', views.assign_role, name='assign_role'),

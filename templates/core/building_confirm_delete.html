@@ -1,0 +1,9 @@
+{% extends 'core/base.html' %}
+{% block content %}
+  <h2>Xác nhận xóa tòa nhà</h2>
+  <p>Bạn có chắc muốn xóa tòa nhà: <strong>{{ building }}</strong> ?</p>
+  <form method="post">{% csrf_token %}
+    <button type="submit">Xóa</button>
+    <a href="{% url 'building_list' %}">Hủy</a>
+  </form>
+{% endblock %}

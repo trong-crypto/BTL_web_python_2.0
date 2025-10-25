@@ -1,0 +1,9 @@
+{% extends 'core/base.html' %}
+{% block content %}
+  <h2>Xác nhận xóa thiết bị</h2>
+  <p>Bạn có chắc muốn xóa: <strong>{{ equipment }}</strong> ?</p>
+  <form method="post">{% csrf_token %}
+    <button type="submit">Xóa</button>
+    <a href="{% url 'equipment_list' equipment.room.pk %}">Hủy</a>
+  </form>
+{% endblock %}

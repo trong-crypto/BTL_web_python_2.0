@@ -1,0 +1,9 @@
+{% extends 'core/base.html' %}
+{% block content %}
+  <h2>Xác nhận xóa phòng</h2>
+  <p>Bạn có chắc muốn xóa: <strong>{{ room }}</strong> ?</p>
+  <form method="post">{% csrf_token %}
+    <button type="submit">Xóa</button>
+    <a href="{% url 'room_list' room.floor.pk %}">Hủy</a>
+  </form>
+{% endblock %}

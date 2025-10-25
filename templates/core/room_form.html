@@ -1,0 +1,8 @@
+{% extends 'core/base.html' %}
+{% block content %}
+  <h2>{% if room %}Sửa phòng{% else %}Thêm phòng{% endif %} - Tầng {{ floor.number }}</h2>
+  <form method="post">{% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Lưu</button>
+  </form>
+{% endblock %}

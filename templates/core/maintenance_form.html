@@ -1,8 +1,97 @@
 {% extends 'core/base.html' %}
 {% block content %}
   <h2>Tạo yêu cầu bảo trì</h2>
-  <form method="post">{% csrf_token %}
-    {{ form.as_p }}
+  <form method="post" id="maintForm">{% csrf_token %}
+    <label>Chọn tòa nhà</label>
+    <select id="buildingSelect">
+      <option value="">-- chọn --</option>
+      {% for b in buildings %}
+        <option value="{{ b.id }}">{{ b.name }} ({{ b.code }})</option>
+      {% endfor %}
+    </select>
+
+    <label>Chọn tầng</label>
+    <select id="floorSelect" disabled>
+      <option value="">-- chọn --</option>
+    </select>
+
+    <label>Chọn phòng</label>
+    <select id="roomSelect" disabled>
+      <option value="">-- chọn --</option>
+    </select>
+
+    <label>Chọn thiết bị</label>
+    <select id="equipmentSelect" disabled>
+      <option value="">-- chọn --</option>
+    </select>
+
+  {{ form.description }}
+  <input type="hidden" name="equipment" id="equipmentHidden" />
+
     <button type="submit">Gửi</button>
+    <button type="submit" name="broken" value="1" style="margin-left:8px;">Báo hỏng</button>
   </form>
+
+  <script>
+    const buildingSelect = document.getElementById('buildingSelect');
+    const floorSelect = document.getElementById('floorSelect');
+    const roomSelect = document.getElementById('roomSelect');
+    const equipmentSelect = document.getElementById('equipmentSelect');
+  const equipmentHidden = document.getElementById('equipmentHidden');
+
+    buildingSelect.addEventListener('change', async () => {
+      floorSelect.innerHTML = '<option value="">-- chọn --</option>';
+      roomSelect.innerHTML = '<option value="">-- chọn --</option>';
+      equipmentSelect.innerHTML = '<option value="">-- chọn --</option>';
+      floorSelect.disabled = true; roomSelect.disabled = true; equipmentSelect.disabled = true;
+      const b = buildingSelect.value;
+      if (!b) return;
+      const res = await fetch(`/api/floors/?building=${b}`);
+      const floors = await res.json();
+      floors.forEach(f => {
+        const opt = document.createElement('option'); opt.value = f.id; opt.textContent = `Tầng ${f.number} ${f.name || ''}`;
+        floorSelect.appendChild(opt);
+      });
+      floorSelect.disabled = false;
+    });
+
+    floorSelect.addEventListener('change', async () => {
+      roomSelect.innerHTML = '<option value="">-- chọn --</option>';
+      equipmentSelect.innerHTML = '<option value="">-- chọn --</option>';
+      roomSelect.disabled = true; equipmentSelect.disabled = true;
+      const f = floorSelect.value;
+      if (!f) return;
+      const res = await fetch(`/api/rooms/?floor=${f}`);
+      const rooms = await res.json();
+      rooms.forEach(r => {
+        const opt = document.createElement('option'); opt.value = r.id; opt.textContent = `${r.code} ${r.name || ''}`;
+        roomSelect.appendChild(opt);
+      });
+      roomSelect.disabled = false;
+    });
+
+    roomSelect.addEventListener('change', async () => {
+      equipmentSelect.innerHTML = '<option value="">-- chọn --</option>';
+      equipmentSelect.disabled = true;
+      const r = roomSelect.value;
+      if (!r) return;
+      const res = await fetch(`/api/equipments/?room=${r}`);
+      const equips = await res.json();
+      equips.forEach(e => {
+        const opt = document.createElement('option'); opt.value = e.id; opt.textContent = `${e.code} ${e.name || ''} (${e.status})`;
+        equipmentSelect.appendChild(opt);
+      });
+      equipmentSelect.disabled = false;
+    });
+
+    document.getElementById('maintForm').addEventListener('submit', (ev) => {
+      const val = equipmentSelect.value;
+      if (!val) {
+        ev.preventDefault();
+        alert('Vui lòng chọn thiết bị');
+        return false;
+      }
+      equipmentHidden.value = val;
+    });
+  </script>
 {% endblock %}

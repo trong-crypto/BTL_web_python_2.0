@@ -1,0 +1,21 @@
+{% extends 'admin/base_site.html' %}
+{% load i18n admin_urls %}
+{% block content %}
+  <h1>Copy equipment to another room</h1>
+  <p>Selected equipments:</p>
+  <ul>
+    {% for e in equipments %}
+      <li>{{ e.code }} - {{ e.name }} ({{ e.room }})</li>
+    {% endfor %}
+  </ul>
+  <form method="post">{% csrf_token %}
+    <label for="room">Destination room</label>
+    <select name="room" id="room">
+      {% for r in rooms %}
+        <option value="{{ r.pk }}">{{ r.floor.building.name }} / Tầng {{ r.floor.number }} / {{ r.code }} {{ r.name }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit">Copy</button>
+    <a href="..">Cancel</a>
+  </form>
+{% endblock %}

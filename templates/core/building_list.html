@@ -1,0 +1,26 @@
+{% extends 'core/base.html' %}
+{% block content %}
+  <h2>Danh sách tòa nhà</h2>
+  {% if user.is_superuser %}
+    <a class="button" href="{% url 'building_create' %}">Thêm tòa nhà</a>
+  {% endif %}
+  <table>
+    <thead><tr><th>Mã</th><th>Tên</th><th></th></tr></thead>
+    <tbody>
+      {% for b in buildings %}
+        <tr>
+          <td>{{ b.code }}</td>
+          <td>{{ b.name }}</td>
+          <td>
+            {% if user.is_superuser %}
+              <a href="{% url 'building_edit' b.pk %}">Sửa</a> |
+              <a href="{% url 'building_delete' b.pk %}">Xóa</a>
+            {% endif %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="3">Không có tòa nhà</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

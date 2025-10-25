@@ -1,0 +1,16 @@
+{% extends 'core/base.html' %}
+{% block content %}
+  <h2>Thiết bị - Phòng {{ room.code }} (Tầng {{ room.floor.number }})</h2>
+  {% if user.is_superuser %}
+    <a class="button" href="{% url 'equipment_create' room.pk %}">Thêm thiết bị</a>
+  {% endif %}
+  <ul>
+    {% for e in equipments %}
+      <li>{{ e.code }} {{ e.name }} - {{ e.get_status_display }}
+        {% if user.is_superuser %} | <a href="{% url 'equipment_edit' e.pk %}">Sửa</a> | <a href="{% url 'equipment_delete' e.pk %}">Xóa</a>{% endif %}
+      </li>
+    {% empty %}
+      <li>Không có thiết bị</li>
+    {% endfor %}
+  </ul>
+{% endblock %}

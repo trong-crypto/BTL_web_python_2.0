@@ -1,0 +1,16 @@
+{% extends 'core/base.html' %}
+{% block content %}
+  <h2>Phòng - Tầng {{ floor.number }} ({{ floor.building.name }})</h2>
+  {% if user.is_superuser %}
+    <a class="button" href="{% url 'room_create' floor.pk %}">Thêm phòng</a>
+  {% endif %}
+  <ul>
+    {% for r in rooms %}
+      <li>{{ r.code }} {{ r.name }} - <a href="{% url 'equipment_list' r.pk %}">Xem thiết bị</a>
+        {% if user.is_superuser %} | <a href="{% url 'room_edit' r.pk %}">Sửa</a> | <a href="{% url 'room_delete' r.pk %}">Xóa</a>{% endif %}
+      </li>
+    {% empty %}
+      <li>Không có phòng</li>
+    {% endfor %}
+  </ul>
+{% endblock %}

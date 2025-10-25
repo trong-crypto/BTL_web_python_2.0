@@ -4,6 +4,6 @@
   <p>Bạn có chắc muốn xóa tài sản: <strong>{{ asset }}</strong> ?</p>
   <form method="post">{% csrf_token %}
     <button type="submit">Xóa</button>
-    <a href="{% url 'asset_list' %}">Hủy</a>
+  <a href="{% url 'building_list' %}">Hủy</a>
   </form>
 {% endblock %}
