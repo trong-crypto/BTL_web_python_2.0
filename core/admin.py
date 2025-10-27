@@ -3,7 +3,7 @@ from .models import Building, Floor, Room, Equipment, MaintenanceRequest
 from django.urls import path
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-
+from django.contrib.admin import SimpleListFilter
 
 
 @admin.register(Building)
@@ -30,7 +30,10 @@ class RoomAdmin(admin.ModelAdmin):
 @admin.register(Equipment)
 class EquipmentAdmin(admin.ModelAdmin):
     list_display = ('code', 'name', 'room', 'status')
-    list_filter = ('status', 'room__floor__building')
+
+    # keep only the custom 'Equipment status' filter (attached below);
+    # remove the built-in field 'status' to avoid duplicate filters
+    list_filter = ('room__floor__building',)
     search_fields = ('code', 'name')
     actions = ['copy_to_room' ]
     
@@ -104,7 +107,40 @@ class EquipmentAdmin(admin.ModelAdmin):
         )
         return render(request, 'admin/core/equipment_copy_to_room.html', context)
 
-    
+
+class EquipmentStatusFilter(SimpleListFilter):
+    title = 'Equipment status'
+    parameter_name = 'equipment_status'
+
+    def lookups(self, request, model_admin):
+        return (
+            (Equipment.STATUS_READY, 'Sẵn sàng'),
+            (Equipment.STATUS_MAINT, 'Đang bảo trì'),
+            (Equipment.STATUS_BROKEN, 'Đã hỏng'),
+        )
+
+    def queryset(self, request, queryset):
+        val = self.value()
+        if not val:
+            return queryset
+        # If model is Equipment, filter directly
+        if queryset.model == Equipment:
+            return queryset.filter(status=val)
+        # If model is Room, filter rooms that have equipments with the status
+        if queryset.model.__name__ == 'Room':
+            return queryset.filter(equipments__status=val).distinct()
+        return queryset
+
+
+# Add the filter to the registered admins: Room and Equipment
+try:
+    # If classes exist in this module scope, update their list_filter
+    RoomAdmin.list_filter = tuple(list(RoomAdmin.list_filter) + [EquipmentStatusFilter])
+    EquipmentAdmin.list_filter = tuple([EquipmentStatusFilter] + list(EquipmentAdmin.list_filter))
+except Exception:
+    pass
+
+ 
 
 
 @admin.register(MaintenanceRequest)

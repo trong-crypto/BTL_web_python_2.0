@@ -7,6 +7,17 @@ from .forms import RegistrationForm
 from django.contrib.auth.models import Group, User
 from django.contrib import messages
 from django.http import JsonResponse
+from django.contrib.auth.views import LoginView
+
+
+class CustomLoginView(LoginView):
+    """Redirect superusers straight to the Django admin after login."""
+
+    def get_success_url(self):
+        # If user is superuser, go to admin index; otherwise use default behavior
+        if self.request.user.is_active and self.request.user.is_superuser:
+            return '/admin/'
+        return super().get_success_url()
 
 
 def is_admin(user):
@@ -35,6 +46,7 @@ def dashboard(request):
         'assets_maint': assets_maint,
         'pending_requests': pending_requests,
         'status_counts': status_counts,
+        'buildings': Building.objects.all(),
     }
     return render(request, 'core/dashboard.html', context)
 
