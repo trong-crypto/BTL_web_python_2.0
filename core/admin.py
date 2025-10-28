@@ -4,39 +4,127 @@ from django.urls import path
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.admin import SimpleListFilter
+from .models import RoomBooking
 
+# Bộ lọc phân cấp cho RoomBooking
+class RoomBookingBuildingFilter(SimpleListFilter):
+    title = 'Tòa nhà'
+    parameter_name = 'booking_building'
+
+    def lookups(self, request, model_admin):
+        buildings = Building.objects.all()
+        return [(b.id, b.name) for b in buildings]
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(room__floor__building_id=self.value())
+        return queryset
+
+class RoomBookingFloorFilter(SimpleListFilter):
+    title = 'Tầng'
+    parameter_name = 'booking_floor'
+
+    def lookups(self, request, model_admin):
+        building_id = request.GET.get('booking_building')
+        if building_id:
+            floors = Floor.objects.filter(building_id=building_id)
+            return [(f.id, f.name) for f in floors]
+        return []
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(room__floor_id=self.value())
+        return queryset
+
+class RoomBookingRoomFilter(SimpleListFilter):
+    title = 'Phòng'
+    parameter_name = 'booking_room'
+
+    def lookups(self, request, model_admin):
+        floor_id = request.GET.get('booking_floor')
+        if floor_id:
+            rooms = Room.objects.filter(floor_id=floor_id)
+            return [(r.id, r.name) for r in rooms]
+        return []
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(room_id=self.value())
+        return queryset
+
+# Bộ lọc phân cấp cho Equipment
+class EquipmentBuildingFilter(SimpleListFilter):
+    title = 'Tòa nhà'
+    parameter_name = 'building'
+
+    def lookups(self, request, model_admin):
+        buildings = Building.objects.all()
+        return [(b.id, b.name) for b in buildings]
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(room__floor__building_id=self.value())
+        return queryset
+
+class EquipmentFloorFilter(SimpleListFilter):
+    title = 'Tầng'
+    parameter_name = 'floor'
+
+    def lookups(self, request, model_admin):
+        building_id = request.GET.get('building')
+        if building_id:
+            floors = Floor.objects.filter(building_id=building_id)
+            return [(f.id, f.name) for f in floors]
+        return []
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(room__floor_id=self.value())
+        return queryset
+
+class EquipmentRoomFilter(SimpleListFilter):
+    title = 'Phòng'
+    parameter_name = 'room'
+
+    def lookups(self, request, model_admin):
+        floor_id = request.GET.get('floor')
+        if floor_id:
+            rooms = Room.objects.filter(floor_id=floor_id)
+            return [(r.id, r.name) for r in rooms]
+        return []
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(room_id=self.value())
+        return queryset
 
 @admin.register(Building)
 class BuildingAdmin(admin.ModelAdmin):
     list_display = ('code', 'name')
     search_fields = ('code', 'name')
-    
-
 
 @admin.register(Floor)
 class FloorAdmin(admin.ModelAdmin):
     list_display = ('building', 'number', 'name')
     list_filter = ('building',)
-    
-
 
 @admin.register(Room)
 class RoomAdmin(admin.ModelAdmin):
-    list_display = ('floor', 'code', 'name')
-    list_filter = ('floor__building',)
-   
-
+    list_display = ('floor', 'code', 'name', 'status')
+    list_filter = ('status', 'floor__building')
+    search_fields = ('name', 'code')
 
 @admin.register(Equipment)
 class EquipmentAdmin(admin.ModelAdmin):
     list_display = ('code', 'name', 'room', 'status')
-
-    # keep only the custom 'Equipment status' filter (attached below);
-    # remove the built-in field 'status' to avoid duplicate filters
-    list_filter = ('room__floor__building',)
+    list_filter = [
+        EquipmentBuildingFilter, 
+        EquipmentFloorFilter, 
+        EquipmentRoomFilter,
+        'status'
+    ]
     search_fields = ('code', 'name')
-    actions = ['copy_to_room' ]
-    
+    actions = ['copy_to_room']
 
     def get_urls(self):
         urls = super().get_urls()
@@ -46,7 +134,6 @@ class EquipmentAdmin(admin.ModelAdmin):
         return custom + urls
 
     def copy_to_room(self, request, queryset):
-        # redirect to intermediate view with selected ids
         ids = ','.join(str(i) for i in queryset.values_list('pk', flat=True))
         return redirect(f'copy-to-room/?ids={ids}')
 
@@ -68,7 +155,6 @@ class EquipmentAdmin(admin.ModelAdmin):
             from django.db import IntegrityError, transaction
 
             for eq in equipments:
-                # attempt to create with same code; if conflict, try to generate a unique code
                 base_code = eq.code
                 new_code = base_code
                 suffix = 1
@@ -89,7 +175,6 @@ class EquipmentAdmin(admin.ModelAdmin):
                     if new_code != base_code:
                         renamed += 1
                 except IntegrityError:
-                    # If we still hit an integrity error, skip this item and continue
                     messages.warning(request, f'Skipped equipment {eq} due to a uniqueness conflict.')
 
             msg = f'Created {created} copies in room {room}.'
@@ -107,9 +192,8 @@ class EquipmentAdmin(admin.ModelAdmin):
         )
         return render(request, 'admin/core/equipment_copy_to_room.html', context)
 
-
 class EquipmentStatusFilter(SimpleListFilter):
-    title = 'Equipment status'
+    title = 'Trạng thái thiết bị'
     parameter_name = 'equipment_status'
 
     def lookups(self, request, model_admin):
@@ -123,28 +207,45 @@ class EquipmentStatusFilter(SimpleListFilter):
         val = self.value()
         if not val:
             return queryset
-        # If model is Equipment, filter directly
         if queryset.model == Equipment:
             return queryset.filter(status=val)
-        # If model is Room, filter rooms that have equipments with the status
         if queryset.model.__name__ == 'Room':
             return queryset.filter(equipments__status=val).distinct()
         return queryset
 
-
 # Add the filter to the registered admins: Room and Equipment
 try:
-    # If classes exist in this module scope, update their list_filter
     RoomAdmin.list_filter = tuple(list(RoomAdmin.list_filter) + [EquipmentStatusFilter])
-    EquipmentAdmin.list_filter = tuple([EquipmentStatusFilter] + list(EquipmentAdmin.list_filter))
+    # EquipmentAdmin.list_filter = tuple([EquipmentStatusFilter] + list(EquipmentAdmin.list_filter))
 except Exception:
     pass
-
- 
-
 
 @admin.register(MaintenanceRequest)
 class MaintenanceRequestAdmin(admin.ModelAdmin):
     list_display = ('id', 'equipment', 'status', 'created_by', 'created_at')
     list_filter = ('status', 'equipment__room__floor__building')
     search_fields = ('equipment__name', 'description')
+
+@admin.register(RoomBooking)
+class RoomBookingAdmin(admin.ModelAdmin):
+    list_display = ['room', 'user', 'purpose', 'start_time', 'end_time', 'status', 'created_at']
+    list_filter = [RoomBookingBuildingFilter, RoomBookingFloorFilter, RoomBookingRoomFilter, 'status', 'start_time', 'created_at']
+    search_fields = ['room__name', 'user__username', 'purpose']
+    date_hierarchy = 'created_at'
+    readonly_fields = ['created_at', 'updated_at']
+    
+    fieldsets = (
+        ('Thông tin đặt phòng', {
+            'fields': ('room', 'user', 'purpose')
+        }),
+        ('Thời gian', {
+            'fields': ('start_time', 'end_time')
+        }),
+        ('Trạng thái', {
+            'fields': ('status',)
+        }),
+        ('Thời gian hệ thống', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )

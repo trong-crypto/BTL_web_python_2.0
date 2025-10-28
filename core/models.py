@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth import get_user_model
+from django.conf import settings
 
 
 class Building(models.Model):
@@ -20,23 +20,35 @@ class Floor(models.Model):
         unique_together = ('building', 'number')
 
     def __str__(self):
-        # Return: "BLDG01 — Building Name — Floor Name"
-        # If floor.name is missing, fall back to number: "BLDG01 — Building Name — Tầng {number}"
         building_part = f"{self.building.code} — {self.building.name}"
         floor_part = self.name if self.name else f"Tầng {self.number}"
         return f"{building_part} — {floor_part}"
 
 
 class Room(models.Model):
+    ROOM_READY = 'ready'
+    ROOM_OCCUPIED = 'occupied'
+    ROOM_MAINTENANCE = 'maintenance'
+    
+    ROOM_STATUS_CHOICES = [
+        (ROOM_READY, 'Sẵn sàng'),
+        (ROOM_OCCUPIED, 'Đang được sử dụng'),
+        (ROOM_MAINTENANCE, 'Đang sửa chữa'),
+    ]
+
     floor = models.ForeignKey(Floor, on_delete=models.CASCADE, related_name='rooms')
     code = models.CharField(max_length=50)
     name = models.CharField(max_length=200, blank=True)
+    status = models.CharField(
+        max_length=15,
+        choices=ROOM_STATUS_CHOICES,
+        default=ROOM_READY
+    )
 
     class Meta:
         unique_together = ('floor', 'code')
 
     def __str__(self):
-        # Use the floor's string (which includes building code and name) then the room label
         floor_label = str(self.floor)
         room_label = f"{self.code} {self.name}".strip()
         return f"{floor_label} — {room_label}"
@@ -78,7 +90,7 @@ class MaintenanceRequest(models.Model):
     ]
 
     equipment = models.ForeignKey(Equipment, on_delete=models.CASCADE, related_name='requests', null=True, blank=True)
-    created_by = models.ForeignKey(get_user_model(), on_delete=models.SET_NULL, null=True, blank=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
     description = models.TextField()
     note = models.TextField(blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
@@ -87,3 +99,36 @@ class MaintenanceRequest(models.Model):
 
     def __str__(self):
         return f"Yêu cầu #{self.id} - {self.equipment} - {self.get_status_display()}"
+
+
+class RoomBooking(models.Model):
+    STATUS_PENDING = 'pending'
+    STATUS_APPROVED = 'approved'
+    STATUS_REJECTED = 'rejected'
+    STATUS_COMPLETED = 'completed'
+    
+    STATUS_CHOICES = [
+        (STATUS_PENDING, 'Chờ duyệt'),
+        (STATUS_APPROVED, 'Đã duyệt'),
+        (STATUS_REJECTED, 'Đã từ chối'),
+        (STATUS_COMPLETED, 'Đã hoàn thành'),
+    ]
+    
+    room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name='bookings')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='room_bookings')
+    purpose = models.TextField('Mục đích sử dụng')
+    start_time = models.DateTimeField('Thời gian bắt đầu')
+    end_time = models.DateTimeField('Thời gian kết thúc')
+    status = models.CharField(
+        max_length=10,
+        choices=STATUS_CHOICES,
+        default=STATUS_PENDING
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.room.name} - {self.user.username} - {self.start_time}"

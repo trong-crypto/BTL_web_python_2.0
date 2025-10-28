@@ -24,7 +24,7 @@
     <hr>
 
     <!-- Danh sách phòng -->
-    <h4 class="mb-3 text-dark"> Danh sách phòng</h4>
+    <h4 class="mb-3 text-dark">🏠 Danh sách phòng</h4>
 
     {% if rooms %}
     <div class="row">
@@ -34,12 +34,36 @@
                 <div class="card-body">
                     <h5 class="card-title text-dark">Phòng {{ room.name }}</h5>
                     <p class="card-text"><strong>Mã phòng:</strong> {{ room.code }}</p>
+                    
+                    <!-- Hiển thị trạng thái phòng -->
+                    <p class="card-text">
+                        <strong>Trạng thái:</strong> 
+                        <span class="badge 
+                            {% if room.status == 'ready' %}bg-success
+                            {% elif room.status == 'occupied' %}bg-warning
+                            {% elif room.status == 'maintenance' %}bg-danger
+                            {% else %}bg-secondary{% endif %}">
+                            {{ room.get_status_display }}
+                        </span>
+                    </p>
+                    
                     {% if room.description %}
                         <p class="card-text text-muted">{{ room.description }}</p>
                     {% endif %}
+                </div>
+
+                <div class="card-footer bg-light">
                     <a href="{% url 'asset_room_detail' room.pk %}" class="btn btn-outline-primary btn-sm">
-                        Xem thiết bị trong phòng
+                        ⚙️ Xem thiết bị
                     </a>
+                    <a href="{% url 'room_booking_create' room.pk %}" class="btn btn-success btn-sm">
+                        📅 Đặt phòng
+                    </a>
+                    {% if user.is_superuser %}
+                    <a href="{% url 'update_room_status' room.pk %}" class="btn btn-warning btn-sm">
+                        🏷️ Cập nhật trạng thái
+                    </a>
+                    {% endif %}
                 </div>
             </div>
         </div>

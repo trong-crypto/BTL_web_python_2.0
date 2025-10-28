@@ -39,4 +39,10 @@ urlpatterns = [
     path('register/', views.register, name='register'),
     path('users/', views.user_list, name='user_list'),
     path('users/<int:user_id>/assign/', views.assign_role, name='assign_role'),
+
+    # Room Booking URLs
+    path('room/<int:room_pk>/booking/create/', views.room_booking_create, name='room_booking_create'),
+    path('bookings/', views.room_booking_list, name='room_booking_list'),
+    path('bookings/<int:pk>/update/', views.room_booking_update, name='room_booking_update'),
+    path('room/<int:pk>/update-status/', views.update_room_status, name='update_room_status'),
 ]

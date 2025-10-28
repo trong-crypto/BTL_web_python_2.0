@@ -1,9 +1,9 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.urls import reverse
-from .models import Building, Floor, Room, Equipment, MaintenanceRequest
+from .models import Building, Floor, Room, Equipment, MaintenanceRequest, RoomBooking  # THÊM RoomBooking
 from .forms import BuildingForm, FloorForm, RoomForm, EquipmentForm, MaintenanceRequestForm, MaintenanceUpdateForm
-from .forms import RegistrationForm
+from .forms import RegistrationForm, RoomBookingForm, RoomStatusForm  # THÊM RoomBookingForm, RoomStatusForm
 from django.contrib.auth.models import Group, User
 from django.contrib import messages
 from django.http import JsonResponse
@@ -356,14 +356,13 @@ def assign_role(request, user_id):
         return redirect('user_list')
     return render(request, 'core/assign_role.html', {'user_obj': user})
 
-#########################################test###########################
-
 
 @login_required
 def asset_hierarchy(request):
     """Hiển thị danh sách tòa nhà - giao diện người dùng cho tài sản"""
     buildings = Building.objects.all()
     return render(request, 'core/asset_buildings.html', {'buildings': buildings})
+
 
 @login_required
 def asset_building_detail(request, pk):
@@ -372,6 +371,7 @@ def asset_building_detail(request, pk):
     floors = building.floors.all().order_by('number')
     return render(request, 'core/asset_floors.html', {'building': building, 'floors': floors})
 
+
 @login_required
 def asset_floor_detail(request, pk):
     """Hiển thị các phòng trong một tầng"""
@@ -379,9 +379,113 @@ def asset_floor_detail(request, pk):
     rooms = floor.rooms.all()
     return render(request, 'core/asset_rooms.html', {'floor': floor, 'rooms': rooms})
 
+
 @login_required
 def asset_room_detail(request, pk):
     """Hiển thị các thiết bị trong một phòng"""
     room = get_object_or_404(Room, pk=pk)
     equipments = room.equipments.all()
     return render(request, 'core/asset_equipment.html', {'room': room, 'equipments': equipments})
+
+
+@login_required
+def room_booking_create(request, room_pk):
+    room = get_object_or_404(Room, pk=room_pk)
+    
+    if request.method == 'POST':
+        form = RoomBookingForm(request.POST)
+        if form.is_valid():
+            booking = form.save(commit=False)
+            booking.room = room
+            booking.user = request.user
+            
+            # Kiểm tra xung đột lịch
+            conflicting_bookings = RoomBooking.objects.filter(
+                room=room,
+                status__in=[RoomBooking.STATUS_PENDING, RoomBooking.STATUS_APPROVED],
+                start_time__lt=booking.end_time,
+                end_time__gt=booking.start_time
+            )
+            
+            if conflicting_bookings.exists():
+                messages.error(request, 'Phòng đã được đặt trong khoảng thời gian này!')
+            else:
+                booking.save()
+                messages.success(request, 'Đã gửi yêu cầu đặt phòng!')
+                return redirect('room_booking_list')
+    else:
+        form = RoomBookingForm()
+    
+    return render(request, 'core/room_booking_form.html', {
+        'form': form,
+        'room': room
+    })
+
+
+@login_required
+def room_booking_list(request):
+    if request.user.is_superuser:
+        # Admin xem tất cả booking
+        bookings = RoomBooking.objects.all().select_related('room', 'user')
+    else:
+        # User chỉ xem booking của mình
+        bookings = RoomBooking.objects.filter(user=request.user).select_related('room', 'user')
+    
+    return render(request, 'core/room_booking_list.html', {
+        'bookings': bookings
+    })
+
+
+@login_required
+@user_passes_test(is_admin)
+def room_booking_update(request, pk):
+    booking = get_object_or_404(RoomBooking, pk=pk)
+    
+    if request.method == 'POST':
+        new_status = request.POST.get('status')
+        if new_status in [choice[0] for choice in RoomBooking.STATUS_CHOICES]:
+            booking.status = new_status
+            booking.save()
+            
+            # Cập nhật trạng thái phòng nếu cần
+            if new_status == RoomBooking.STATUS_APPROVED:
+                booking.room.status = Room.ROOM_OCCUPIED
+                booking.room.save()
+            elif new_status in [RoomBooking.STATUS_REJECTED, RoomBooking.STATUS_COMPLETED]:
+                # Kiểm tra xem còn booking nào đang active không
+                active_bookings = RoomBooking.objects.filter(
+                    room=booking.room,
+                    status__in=[RoomBooking.STATUS_APPROVED, RoomBooking.STATUS_PENDING]
+                ).exclude(pk=booking.pk)
+                
+                if not active_bookings.exists():
+                    booking.room.status = Room.ROOM_READY
+                    booking.room.save()
+            
+            messages.success(request, 'Đã cập nhật trạng thái đặt phòng!')
+        
+        return redirect('room_booking_list')
+    
+    return render(request, 'core/room_booking_update.html', {
+        'booking': booking
+    })
+
+
+@login_required
+@user_passes_test(is_admin)
+def update_room_status(request, pk):
+    room = get_object_or_404(Room, pk=pk)
+    
+    if request.method == 'POST':
+        form = RoomStatusForm(request.POST, instance=room)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Đã cập nhật trạng thái phòng!')
+            return redirect('asset_room_detail', pk=room.pk)
+    else:
+        form = RoomStatusForm(instance=room)
+    
+    return render(request, 'core/room_status_form.html', {
+        'form': form,
+        'room': room
+    })

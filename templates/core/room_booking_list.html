@@ -1,0 +1,41 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>📋 Lịch sử đặt phòng</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Phòng</th>
+                <th>Người đặt</th>
+                <th>Thời gian</th>
+                <th>Trạng thái</th>
+                <th>Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for booking in bookings %}
+            <tr>
+                <td>{{ booking.room.name }}</td>
+                <td>{{ booking.user.username }}</td>
+                <td>{{ booking.start_time|date:"d/m/Y H:i" }} - {{ booking.end_time|date:"d/m/Y H:i" }}</td>
+                <td>
+                    <span class="badge 
+                        {% if booking.status == 'approved' %}bg-success
+                        {% elif booking.status == 'pending' %}bg-warning
+                        {% elif booking.status == 'rejected' %}bg-danger
+                        {% else %}bg-secondary{% endif %}">
+                        {{ booking.get_status_display }}
+                    </span>
+                </td>
+                <td>
+                    {% if user.is_superuser %}
+                    <a href="{% url 'room_booking_update' booking.pk %}" class="btn btn-sm btn-outline-primary">Duyệt</a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
