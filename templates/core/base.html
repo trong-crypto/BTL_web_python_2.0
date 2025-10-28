@@ -9,9 +9,9 @@
   </head>
   <body>
     <header>
-      <a href="/">Dashboard</a> |
-      <a href="/assets/">Tài sản</a> |
-      <a href="/maintenance/">Yêu cầu bảo trì</a> |
+      <a href="{% url 'dashboard' %}">Dashboard</a> |
+      <a href="{% url 'asset_hierarchy' %}">Tài sản</a> |
+      <a href="{% url 'maintenance_list' %}">Yêu cầu bảo trì</a> |
       {% if user.is_authenticated %}
         Xin chào {{ user.username }} (
           <form method="post" action="{% url 'logout' %}" style="display:inline">{% csrf_token %}

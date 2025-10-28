@@ -1,0 +1,79 @@
+{% extends 'core/base.html' %}
+
+{% block title %}{{ room.name }} - Danh sách thiết bị{% endblock %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <!-- Thông tin phòng -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h2 class="text-primary mb-1"> {{ room.floor.building.name }}</h2>
+            <h4 class="text-dark mb-1">Tầng: {{ room.floor.name }}</h4>
+            <h5 class="text-dark mb-1">Phòng: {{ room.name }}</h5>
+            <p class="text-muted mb-0"><strong>Mã phòng:</strong> {{ room.code }}</p>
+            {% if room.description %}
+                <p class="text-muted">{{ room.description }}</p>
+            {% endif %}
+        </div>
+
+        <a href="{% url 'asset_floor_detail' room.floor.pk %}" class="btn btn-outline-secondary">
+            ← Quay lại danh sách phòng
+        </a>
+    </div>
+
+    <hr>
+
+    <!-- Danh sách thiết bị -->
+    <h4 class="mb-3 text-dark"> Danh sách thiết bị</h4>
+
+    {% if equipments %}
+    <div class="row">
+        {% for equipment in equipments %}
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title text-dark">{{ equipment.name }}</h5>
+                    <p class="card-text"><strong>Mã thiết bị:</strong> {{ equipment.code }}</p>
+                    {% if equipment.type %}
+                        <p class="card-text"><strong>Loại:</strong> {{ equipment.type }}</p>
+                    {% endif %}
+                    {% if equipment.status %}
+                        <p class="card-text"><strong>Tình trạng:</strong> {{ equipment.status }}</p>
+                    {% endif %}
+                    {% if equipment.description %}
+                        <p class="card-text text-muted">{{ equipment.description }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="card-footer bg-light">
+                    <a href="{% url 'maintenance_create' %}?equipment_id={{ equipment.pk }}" class="btn btn-outline-primary btn-sm">
+                        Gửi yêu cầu bảo trì
+                    </a>
+                    {% if user.is_superuser %}
+                    <a href="{% url 'equipment_edit' equipment.pk %}" class="btn btn-warning btn-sm"> Sửa</a>
+                    <a href="{% url 'equipment_delete' equipment.pk %}" class="btn btn-danger btn-sm"
+                       onclick="return confirm('Bạn có chắc muốn xóa thiết bị này không?');">
+                         Xóa
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        Phòng này chưa có thiết bị nào được thêm.
+    </div>
+    {% endif %}
+
+    {% if user.is_superuser %}
+    <a href="{% url 'equipment_create' room.pk %}" class="btn btn-success mt-3">
+        + Thêm thiết bị mới
+    </a>
+    {% endif %}
+
+</div>
+{% endblock %}

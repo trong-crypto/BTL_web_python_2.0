@@ -1,0 +1,61 @@
+{% extends 'core/base.html' %}
+
+{% block title %}{{ building.name }} - Danh sách tầng{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <!-- Tiêu đề tòa nhà -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h2 class="text-primary mb-1"> {{ building.name }}</h2>
+            <p class="text-muted mb-0"><strong>Mã:</strong> {{ building.code }}</p>
+            {% if building.description %}
+                <p class="text-muted">{{ building.description }}</p>
+            {% endif %}
+        </div>
+
+        <a href="{% url 'asset_hierarchy' %}" class="btn btn-outline-secondary">
+            ← Quay lại danh sách tòa nhà
+        </a>
+
+    </div>
+
+    <hr>
+
+    <!-- Danh sách tầng -->
+    <h4 class="mb-3 text-dark"> Danh sách tầng</h4>
+
+    {% if floors %}
+    <div class="row">
+        {% for floor in floors %}
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title text-dark">Tầng {{ floor.name }}</h5>
+                    <p class="card-text"><strong>Mã tầng:</strong> {{ floor.code }}</p>
+                    {% if floor.description %}
+                        <p class="card-text text-muted">{{ floor.description }}</p>
+                    {% endif %}
+                    <a href="{% url 'asset_floor_detail' floor.pk %}" class="btn btn-outline-primary btn-sm">
+                        Xem phòng trong tầng
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        Tòa nhà này chưa có tầng nào được thêm.
+    </div>
+    {% endif %}
+
+    {% if user.is_superuser %}
+    <a href="{% url 'floor_create' building.pk %}" class="btn btn-success mt-3">
+        + Thêm tầng mới
+    </a>
+    {% endif %}
+
+</div>
+{% endblock %}

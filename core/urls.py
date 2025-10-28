@@ -4,11 +4,12 @@ from django.views.generic.base import RedirectView
 
 urlpatterns = [
     path('', views.dashboard, name='dashboard'),
-    path('buildings/', views.building_list, name='building_list'),
+
+    path('buildings/', RedirectView.as_view(pattern_name='asset_hierarchy', permanent=False), name='building_list'),
+    
     path('buildings/create/', views.building_create, name='building_create'),
     path('buildings/<int:pk>/edit/', views.building_edit, name='building_edit'),
     path('buildings/<int:pk>/delete/', views.building_delete, name='building_delete'),
-    path('assets/', RedirectView.as_view(url='/buildings/', permanent=True)),
     path('buildings/<int:pk>/', views.building_detail, name='building_detail'),
     path('buildings/<int:building_pk>/floors/create/', views.floor_create, name='floor_create'),
     path('floors/<int:pk>/edit/', views.floor_edit, name='floor_edit'),
@@ -24,6 +25,13 @@ urlpatterns = [
     path('maintenance/create/', views.maintenance_create, name='maintenance_create'),
     path('maintenance/', views.maintenance_list, name='maintenance_list'),
     path('maintenance/<int:pk>/update/', views.maintenance_update, name='maintenance_update'),
+    
+    # Đường dẫn mới cho tài sản - GIAO DIỆN MỚI
+    path('assets/', views.asset_hierarchy, name='asset_hierarchy'),
+    path('assets/building/<int:pk>/', views.asset_building_detail, name='asset_building_detail'),
+    path('assets/floor/<int:pk>/', views.asset_floor_detail, name='asset_floor_detail'),
+    path('assets/room/<int:pk>/', views.asset_room_detail, name='asset_room_detail'),
+    
     # API endpoints for dependent selects
     path('api/floors/', views.api_floors, name='api_floors'),
     path('api/rooms/', views.api_rooms, name='api_rooms'),

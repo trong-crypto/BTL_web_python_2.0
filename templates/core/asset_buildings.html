@@ -1,0 +1,34 @@
+
+
+{% extends 'core/base.html' %}
+
+{% block title %}Tài sản - Danh sách Tòa nhà{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4 text-primary"> Danh sách Tòa nhà</h2>
+
+    {% if buildings %}
+    <div class="row">
+        {% for building in buildings %}
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title text-dark">{{ building.name }}</h5>
+                    <p class="card-text"><strong>Mã:</strong> {{ building.code }}</p>
+                    {% if building.description %}
+                        <p class="card-text text-muted">{{ building.description }}</p>
+                    {% endif %}
+                    <a href="{% url 'asset_building_detail' building.pk %}" class="btn btn-outline-primary btn-sm">
+                        Xem chi tiết
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info">Hiện chưa có tòa nhà nào trong hệ thống.</div>
+    {% endif %}
+</div>
+{% endblock %}

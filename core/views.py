@@ -46,7 +46,6 @@ def dashboard(request):
         'assets_maint': assets_maint,
         'pending_requests': pending_requests,
         'status_counts': status_counts,
-        'buildings': Building.objects.all(),
     }
     return render(request, 'core/dashboard.html', context)
 
@@ -356,3 +355,33 @@ def assign_role(request, user_id):
         messages.success(request, 'Đã cập nhật vai trò.')
         return redirect('user_list')
     return render(request, 'core/assign_role.html', {'user_obj': user})
+
+#########################################test###########################
+
+
+@login_required
+def asset_hierarchy(request):
+    """Hiển thị danh sách tòa nhà - giao diện người dùng cho tài sản"""
+    buildings = Building.objects.all()
+    return render(request, 'core/asset_buildings.html', {'buildings': buildings})
+
+@login_required
+def asset_building_detail(request, pk):
+    """Hiển thị các tầng trong một tòa nhà"""
+    building = get_object_or_404(Building, pk=pk)
+    floors = building.floors.all().order_by('number')
+    return render(request, 'core/asset_floors.html', {'building': building, 'floors': floors})
+
+@login_required
+def asset_floor_detail(request, pk):
+    """Hiển thị các phòng trong một tầng"""
+    floor = get_object_or_404(Floor, pk=pk)
+    rooms = floor.rooms.all()
+    return render(request, 'core/asset_rooms.html', {'floor': floor, 'rooms': rooms})
+
+@login_required
+def asset_room_detail(request, pk):
+    """Hiển thị các thiết bị trong một phòng"""
+    room = get_object_or_404(Room, pk=pk)
+    equipments = room.equipments.all()
+    return render(request, 'core/asset_equipment.html', {'room': room, 'equipments': equipments})
