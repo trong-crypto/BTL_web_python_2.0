@@ -1,0 +1,29 @@
+{% extends "admin/change_list.html" %}
+{% load i18n %}
+
+{% block filters %}
+    {% if cl.has_filters %}
+    <div id="changelist-filter">
+        <h2>{% translate 'Filter' %}</h2>
+        {% for spec in cl.filter_specs %}
+            {# Ẩn filter phòng #}
+            {% if spec.title != "Phòng" and spec.title != "Room" and "phòng" not in spec.title|lower and "room" not in spec.title|lower %}
+            <div class="filter-group">
+                <h3>{{ spec.title }}</h3>
+                <ul>
+                    {% if spec.lookup_choices %}
+                        {% for choice in spec.lookup_choices %}
+                            <li{% if choice.selected %} class="selected"{% endif %}>
+                                <a href="{{ choice.query_string|iriencode }}">{{ choice.display }}</a>
+                            </li>
+                        {% endfor %}
+                    {% else %}
+                        <li><span style="color: #999;">---</span></li>
+                    {% endif %}
+                </ul>
+            </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+    {% endif %}
+{% endblock %}

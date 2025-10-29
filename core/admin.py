@@ -98,6 +98,36 @@ class EquipmentRoomFilter(SimpleListFilter):
             return queryset.filter(room_id=self.value())
         return queryset
 
+# Bộ lọc phân cấp cho Rooms
+class RoomBuildingFilter(SimpleListFilter):
+    title = 'Tòa nhà'
+    parameter_name = 'building'
+
+    def lookups(self, request, model_admin):
+        buildings = Building.objects.all()
+        return [(b.id, b.name) for b in buildings]
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(floor__building_id=self.value())
+        return queryset
+    
+class RoomFloorFilter(SimpleListFilter):
+    title = 'Tầng'
+    parameter_name = 'floor'
+
+    def lookups(self, request, model_admin):
+        building_id = request.GET.get('building')
+        if building_id:
+            floors = Floor.objects.filter(building_id=building_id)
+            return [(f.id, f.name) for f in floors]
+        return []
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(floor_id=self.value())
+        return queryset
+
 @admin.register(Building)
 class BuildingAdmin(admin.ModelAdmin):
     list_display = ('code', 'name')
@@ -111,7 +141,11 @@ class FloorAdmin(admin.ModelAdmin):
 @admin.register(Room)
 class RoomAdmin(admin.ModelAdmin):
     list_display = ('floor', 'code', 'name', 'status')
-    list_filter = ('status', 'floor__building')
+    list_filter = [
+        RoomBuildingFilter, 
+        RoomFloorFilter,
+        'status'
+    ]
     search_fields = ('name', 'code')
 
 @admin.register(Equipment)
