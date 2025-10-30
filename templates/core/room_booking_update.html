@@ -1,0 +1,26 @@
+{% extends 'core/base.html' %}
+{% block content %}
+  <div style="max-width:700px;margin:40px auto;background:#fff;padding:24px;border-radius:10px;">
+    <h2>Cập nhật trạng thái đặt phòng</h2>
+    <p><strong>Phòng:</strong> {{ booking.room.name }} ({{ booking.room.code }})</p>
+    <p><strong>Người đặt:</strong> {{ booking.user.username }}</p>
+    <p><strong>Thời gian:</strong> {{ booking.start_time }} → {{ booking.end_time }}</p>
+    <p><strong>Trạng thái hiện tại:</strong> {{ booking.get_status_display }}</p>
+
+    <form method="post">
+      {% csrf_token %}
+      <label for="status">Chọn trạng thái mới</label>
+      <select name="status" id="status" style="width:100%;padding:8px;margin:8px 0;border-radius:6px;border:1px solid #ccc;">
+        <option value="pending" {% if booking.status == 'pending' %}selected{% endif %}>Chờ duyệt</option>
+        <option value="approved" {% if booking.status == 'approved' %}selected{% endif %}>Đã duyệt</option>
+        <option value="rejected" {% if booking.status == 'rejected' %}selected{% endif %}>Đã từ chối</option>
+        <option value="completed" {% if booking.status == 'completed' %}selected{% endif %}>Đã hoàn thành</option>
+      </select>
+
+      <div style="display:flex;gap:8px;justify-content:flex-end;">
+        <a href="{% url 'room_booking_list' %}" class="btn-outline-primary" style="padding:8px 12px;border-radius:6px;text-decoration:none">Hủy</a>
+        <button type="submit" style="background:#16a34a;color:#fff;padding:8px 12px;border-radius:6px;border:none;">Lưu</button>
+      </div>
+    </form>
+  </div>
+{% endblock %}

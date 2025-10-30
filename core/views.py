@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.urls import reverse
 from .models import Building, Floor, Room, Equipment, MaintenanceRequest, RoomBooking  # THÊM RoomBooking
+from django.utils import timezone
 from .forms import BuildingForm, FloorForm, RoomForm, EquipmentForm, MaintenanceRequestForm, MaintenanceUpdateForm
 from .forms import RegistrationForm, RoomBookingForm, RoomStatusForm  # THÊM RoomBookingForm, RoomStatusForm
 from django.contrib.auth.models import Group, User
@@ -252,7 +253,27 @@ def floor_delete(request, pk):
 @login_required
 def room_list(request, floor_pk):
     floor = get_object_or_404(Floor, pk=floor_pk)
-    rooms = floor.rooms.all()
+    rooms = list(floor.rooms.all())
+    # annotate rooms with active booking status (treat pending and approved as blocking)
+    now = timezone.now()
+    for r in rooms:
+        try:
+            active = RoomBooking.objects.filter(
+                room=r,
+                status__in=[RoomBooking.STATUS_APPROVED, RoomBooking.STATUS_PENDING],
+                start_time__lte=now,
+                end_time__gte=now
+            ).first()
+            if active:
+                r.is_booked_now = True
+                r.current_booking = active
+            else:
+                r.is_booked_now = False
+                r.current_booking = None
+        except Exception:
+            r.is_booked_now = False
+            r.current_booking = None
+
     return render(request, 'core/room_list.html', {'floor': floor, 'rooms': rooms})
 
 
@@ -439,6 +460,27 @@ def asset_floor_detail(request, pk):
     """Hiển thị các phòng trong một tầng"""
     floor = get_object_or_404(Floor, pk=pk)
     rooms = floor.rooms.all()
+    rooms = list(floor.rooms.all())
+    # mark rooms that have an approved booking active now
+    now = timezone.now()
+    for r in rooms:
+        try:
+            active = RoomBooking.objects.filter(
+                room=r,
+                status__in=[RoomBooking.STATUS_APPROVED, RoomBooking.STATUS_PENDING],
+                start_time__lte=now,
+                end_time__gte=now
+            ).first()
+            if active:
+                r.is_booked_now = True
+                r.current_booking = active
+            else:
+                r.is_booked_now = False
+                r.current_booking = None
+        except Exception:
+            r.is_booked_now = False
+            r.current_booking = None
+
     return render(request, 'core/asset_rooms.html', {'floor': floor, 'rooms': rooms})
 
 
@@ -447,6 +489,21 @@ def asset_room_detail(request, pk):
     """Hiển thị các thiết bị trong một phòng"""
     room = get_object_or_404(Room, pk=pk)
     equipments = room.equipments.all()
+    # determine if room has an active approved booking now
+    now = timezone.now()
+    active = RoomBooking.objects.filter(
+        room=room,
+        status__in=[RoomBooking.STATUS_APPROVED, RoomBooking.STATUS_PENDING],
+        start_time__lte=now,
+        end_time__gte=now
+    ).first()
+    if active:
+        room.is_booked_now = True
+        room.current_booking = active
+    else:
+        room.is_booked_now = False
+        room.current_booking = None
+
     return render(request, 'core/asset_equipment.html', {'room': room, 'equipments': equipments})
 
 

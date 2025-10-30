@@ -103,6 +103,11 @@ hr {
   border-top: 1px solid #fbd5d5;
   background-color: #fff0f0;
   padding: 10px 14px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-start;
 }
 
 /* 🧱 Alert */
@@ -198,7 +203,11 @@ hr {
         </div>
         <div class="card-footer">
           <a href="{% url 'asset_room_detail' room.pk %}" class="btn btn-outline-primary btn-sm">⚙️ Xem thiết bị</a>
-          <a href="{% url 'room_booking_create' room.pk %}" class="btn btn-success btn-sm">📅 Đặt phòng</a>
+          {% if room.is_booked_now %}
+            <button class="btn btn-secondary btn-sm" disabled>📌 Đã được đặt đến {{ room.current_booking.end_time }}</button>
+          {% else %}
+            <a href="{% url 'room_booking_create' room.pk %}" class="btn btn-success btn-sm">📅 Đặt phòng</a>
+          {% endif %}
           {% if user.is_superuser %}
           <a href="{% url 'update_room_status' room.pk %}" class="btn btn-warning btn-sm">🏷️ Cập nhật</a>
           {% endif %}

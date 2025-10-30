@@ -168,9 +168,17 @@
       {% endif %}
     </div>
 
-    <a href="{% url 'asset_floor_detail' room.floor.pk %}" class="btn-back mt-3 mt-md-0">
-      ← Quay lại danh sách phòng
-    </a>
+    <div style="display:flex;gap:12px;align-items:center">
+      {% if room.is_booked_now %}
+        <button class="btn-back mt-3 mt-md-0" disabled>📌 Đã được đặt đến {{ room.current_booking.end_time }}</button>
+      {% else %}
+        <a href="{% url 'room_booking_create' room.pk %}" class="btn-back mt-3 mt-md-0">📅 Đặt phòng</a>
+      {% endif %}
+
+      <a href="{% url 'asset_floor_detail' room.floor.pk %}" class="btn-back mt-3 mt-md-0">
+        ← Quay lại danh sách phòng
+      </a>
+    </div>
   </div>
 
   <!-- Danh sách thiết bị -->
