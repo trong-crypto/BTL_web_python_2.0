@@ -1,8 +1,108 @@
 {% extends 'core/base.html' %}
+
+{% block title %}
+{% if equipment %}Sửa thiết bị{% else %}Thêm thiết bị{% endif %} - Phòng {{ room.code }}
+{% endblock %}
+
 {% block content %}
-  <h2>{% if equipment %}Sửa thiết bị{% else %}Thêm thiết bị{% endif %} - Phòng {{ room.code }}</h2>
-  <form method="post">{% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Lưu</button>
-  </form>
+<style>
+/* ===== Giao diện Thêm / Sửa Thiết Bị ===== */
+.device-form-container {
+    max-width: 600px;
+    margin: 60px auto;
+    background: #fff;
+    padding: 35px 30px;
+    border-radius: 16px;
+    box-shadow: 0 6px 25px rgba(220, 53, 69, 0.15);
+    animation: fadeIn 0.4s ease-in-out;
+}
+
+/* Hiệu ứng mượt khi load */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Tiêu đề */
+.device-form-container h2 {
+    color: #dc3545;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.device-form-container p {
+    text-align: center;
+    color: #555;
+    margin-bottom: 20px;
+}
+
+/* Form chung */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+form label {
+    font-weight: 600;
+    color: #333;
+}
+
+form input,
+form select,
+form textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: border-color 0.25s ease;
+}
+
+form input:focus,
+form select:focus,
+form textarea:focus {
+    border-color: #dc3545;
+    outline: none;
+}
+
+/* Nút lưu */
+form button {
+    margin-top: 15px;
+    padding: 10px 20px;
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+form button:hover {
+    background-color: #b02a37;
+    transform: translateY(-1px);
+}
+
+/* Responsive nhỏ gọn */
+@media (max-width: 576px) {
+    .device-form-container {
+        margin: 30px 15px;
+        padding: 25px 20px;
+    }
+}
+</style>
+
+<div class="device-form-container">
+    <h2>{% if equipment %}✏️ Sửa thiết bị{% else %}➕ Thêm thiết bị{% endif %}</h2>
+    <p>Phòng: <strong>{{ room.code }}</strong></p>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">💾 Lưu</button>
+    </form>
+</div>
 {% endblock %}

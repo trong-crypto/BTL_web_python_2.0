@@ -1,17 +1,116 @@
 {% extends 'core/base.html' %}
 {% block content %}
-  <h2>Danh sách yêu cầu bảo trì</h2>
-  <a class="button" href="{% url 'maintenance_create' %}">Tạo yêu cầu</a>
+<style>
+/* ===== Trang Danh Sách Yêu Cầu Bảo Trì ===== */
+.maint-table-container {
+  max-width: 1100px;
+  margin: 50px auto;
+  background: #fff;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 6px 25px rgba(179, 0, 0, 0.15);
+  animation: fadeIn 0.4s ease-in-out;
+  font-family: "Segoe UI", sans-serif;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Tiêu đề */
+.maint-table-container h2 {
+  text-align: center;
+  color: #b30000;
+  font-weight: 700;
+  margin-bottom: 25px;
+}
+
+/* Nút tạo yêu cầu */
+.maint-table-container .button {
+  display: inline-block;
+  background-color: #b30000;
+  color: white;
+  padding: 10px 18px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  margin-bottom: 20px;
+  transition: background 0.3s, transform 0.2s;
+}
+
+.maint-table-container .button:hover {
+  background-color: #e60000;
+  transform: scale(1.03);
+}
+
+/* Bảng */
+.maint-table-container table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+
+.maint-table-container th,
+.maint-table-container td {
+  border: 1px solid #ddd;
+  padding: 10px 12px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.maint-table-container th {
+  background-color: #b30000;
+  color: white;
+  text-align: center;
+}
+
+.maint-table-container tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.maint-table-container tr:hover {
+  background-color: #ffe5e5;
+  transition: background-color 0.2s ease-in-out;
+}
+
+/* Liên kết trong bảng */
+.maint-table-container a {
+  color: #b30000;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.maint-table-container a:hover {
+  text-decoration: underline;
+}
+</style>
+
+<div class="maint-table-container">
+  <h2>🧰 Danh sách yêu cầu bảo trì</h2>
+  
+  <a class="button" href="{% url 'maintenance_create' %}">➕ Tạo yêu cầu</a>
+  
   <table>
-    <thead><tr><th>ID</th><th>Thiết bị</th><th>Vị trí</th><th>Mô tả</th><th>Trạng thái</th><th>Người gửi</th><th>Hành động</th></tr></thead>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Thiết bị</th>
+        <th>Vị trí</th>
+        <th>Mô tả</th>
+        <th>Trạng thái</th>
+        <th>Người gửi</th>
+        <th>Hành động</th>
+      </tr>
+    </thead>
     <tbody>
       {% for r in requests %}
         <tr>
           <td>{{ r.id }}</td>
           <td>{{ r.equipment }}</td>
-          <td>
-            {{ r.equipment.room.floor.building.name }} / Tầng {{ r.equipment.room.floor.number }} / Phòng {{ r.equipment.room.code }}
-          </td>
+          <td>{{ r.equipment.room.floor.building.name }} / 
+              Tầng {{ r.equipment.room.floor.number }} / 
+              Phòng {{ r.equipment.room.code }}</td>
           <td>{{ r.description }}</td>
           <td>{{ r.get_status_display }}</td>
           <td>{{ r.created_by }}</td>
@@ -22,8 +121,9 @@
           </td>
         </tr>
       {% empty %}
-        <tr><td colspan="6">Không có yêu cầu</td></tr>
+        <tr><td colspan="7" style="text-align:center;">Không có yêu cầu</td></tr>
       {% endfor %}
     </tbody>
   </table>
+</div>
 {% endblock %}

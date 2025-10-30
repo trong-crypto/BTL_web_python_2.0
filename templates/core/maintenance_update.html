@@ -1,10 +1,93 @@
 {% extends 'core/base.html' %}
 {% block content %}
-  <h2>Cập nhật yêu cầu #{{ req.id }}</h2>
-  <p>Tài sản: {{ req.asset }}</p>
-  <p>Mô tả: {{ req.description }}</p>
-  <form method="post">{% csrf_token %}
+<style>
+/* ===== Giao diện Cập nhật yêu cầu (tông đỏ) ===== */
+.container {
+  max-width: 600px;
+  margin: 40px auto;
+}
+
+h2 {
+  margin-bottom: 15px;
+  color: #dc3545;
+  font-weight: 600;
+}
+
+p {
+  margin: 8px 0;
+  font-size: 15px;
+  color: #333;
+}
+
+form {
+  background: #fff;
+  padding: 20px 24px;
+  border-radius: 14px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+form p {
+  margin-bottom: 12px;
+}
+
+input, select, textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  font-size: 15px;
+  margin-top: 5px;
+  transition: all 0.2s ease;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 0.15rem rgba(220, 53, 69, 0.25);
+  outline: none;
+}
+
+button {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 15px;
+  transition: all 0.25s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+button:hover {
+  background-color: #b02a37;
+  transform: translateY(-2px);
+}
+
+.info-box {
+  background: #fff3f3;
+  border-left: 4px solid #dc3545;
+  padding: 10px 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+</style>
+
+<div class="container">
+  <h2>🛠️ Cập nhật yêu cầu #{{ req.id }}</h2>
+
+  <div class="info-box">
+    <p><strong>Thiết bị:</strong> {{ req.equipment }}</p>
+    <p><strong>Mô tả:</strong> {{ req.description }}</p>
+  </div>
+
+  <form method="post">
+    {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit">Lưu</button>
+    <button type="submit">💾 Lưu thay đổi</button>
   </form>
+</div>
 {% endblock %}

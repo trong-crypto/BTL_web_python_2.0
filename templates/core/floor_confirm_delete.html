@@ -1,9 +1,71 @@
 {% extends 'core/base.html' %}
 {% block content %}
+<style>
+  .delete-container {
+    background-color: #fff;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 0 10px rgba(200, 0, 0, 0.2);
+    max-width: 500px;
+    margin: 40px auto;
+    text-align: center;
+    font-family: Arial, sans-serif;
+  }
+
+  h2 {
+    color: #b30000;
+    margin-bottom: 20px;
+  }
+
+  p {
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 25px;
+  }
+
+  strong {
+    color: #a00000;
+  }
+
+  button {
+    background-color: #b30000;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 15px;
+    transition: background 0.3s;
+  }
+
+  button:hover {
+    background-color: #e60000;
+  }
+
+  a {
+    display: inline-block;
+    margin-left: 10px;
+    color: #b30000;
+    text-decoration: none;
+    padding: 10px 18px;
+    border: 1px solid #b30000;
+    border-radius: 6px;
+    transition: all 0.3s;
+  }
+
+  a:hover {
+    background-color: #b30000;
+    color: white;
+  }
+</style>
+
+<div class="delete-container">
   <h2>Xác nhận xóa tầng</h2>
   <p>Bạn có chắc muốn xóa: <strong>{{ floor }}</strong> ?</p>
-  <form method="post">{% csrf_token %}
+  <form method="post">
+    {% csrf_token %}
     <button type="submit">Xóa</button>
     <a href="{% url 'building_detail' floor.building.pk %}">Hủy</a>
   </form>
+</div>
 {% endblock %}

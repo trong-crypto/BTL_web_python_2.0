@@ -1,8 +1,34 @@
 {% extends 'core/base.html' %}
+
+{% block title %}
+  {% if asset %}Sửa tài sản{% else %}Thêm tài sản{% endif %}
+{% endblock %}
+
 {% block content %}
-  <h2>{% if asset %}Sửa tài sản{% else %}Thêm tài sản{% endif %}</h2>
-  <form method="post">{% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Lưu</button>
-  </form>
+<div class="container mt-4">
+
+    <div class="card shadow-sm p-4">
+        <h2 class="text-center mb-4 text-primary">
+            {% if asset %}Sửa tài sản{% else %}Thêm tài sản{% endif %}
+        </h2>
+
+        <form method="post" class="needs-validation" novalidate>
+            {% csrf_token %}
+            
+            <div class="mb-3">
+                {{ form.as_p }}
+            </div>
+
+            <div class="d-flex justify-content-center gap-3 mt-4">
+                <button type="submit" class="btn btn-success px-4">
+                    💾 Lưu
+                </button>
+                <a href="{% url 'building_list' %}" class="btn btn-outline-secondary px-4">
+                    ← Hủy
+                </a>
+            </div>
+        </form>
+    </div>
+
+</div>
 {% endblock %}

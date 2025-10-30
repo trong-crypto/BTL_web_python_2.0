@@ -1,42 +1,117 @@
 {% extends 'core/base.html' %}
 {% block content %}
-  <h2>Dashboard tổng quan</h2>
+<style>
+/* ==== DASHBOARD ==== */
+.dashboard-container {
+  max-width: 1100px;
+  margin: 50px auto;
+  background: #fff5f5;
+  border-radius: 16px;
+  padding: 30px 40px;
+  box-shadow: 0 6px 20px rgba(255, 0, 0, 0.15);
+  animation: fadeIn 0.4s ease-in-out;
+}
+
+/* Hiệu ứng xuất hiện */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Tiêu đề */
+.dashboard-container h2 {
+  text-align: center;
+  color: #c62828;
+  font-weight: 700;
+  margin-bottom: 30px;
+}
+
+/* Card thống kê */
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 25px;
+  margin-bottom: 40px;
+}
+
+.card {
+  flex: 1;
+  min-width: 250px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 25px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(255, 0, 0, 0.08);
+  border: 2px solid #f8d7da;
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 8px 20px rgba(255, 0, 0, 0.15);
+}
+
+.card h4 {
+  color: #b71c1c;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.card p {
+  font-size: 1.8rem;
+  color: #d32f2f;
+  font-weight: bold;
+  margin: 0;
+}
+
+/* Biểu đồ */
+h3 {
+  text-align: center;
+  color: #c62828;
+  margin-bottom: 20px;
+  font-weight: 600;
+}
+
+.chart-container {
+  width: 280px;
+  margin: 0 auto;
+}
+</style>
+
+<div class="dashboard-container">
+  <h2>📊 Dashboard tổng quan</h2>
+  
   <div class="row">
-    <div class="col-sm-4">
-      <div class="card">
-        <h4>Tổng số tài sản</h4>
-        <p>{{ total_assets }}</p>
-      </div>
+    <div class="card">
+      <h4>Tổng số tài sản</h4>
+      <p>{{ total_assets }}</p>
     </div>
-    <div class="col-sm-4">
-      <div class="card">
-        <h4>Tài sản đang bảo trì</h4>
-        <p>{{ assets_maint }}</p>
-      </div>
+    <div class="card">
+      <h4>Tài sản đang bảo trì</h4>
+      <p>{{ assets_maint }}</p>
     </div>
-    <div class="col-sm-4">
-      <div class="card">
-        <h4>Yêu cầu đang chờ</h4>
-        <p>{{ pending_requests }}</p>
-      </div>
+    <div class="card">
+      <h4>Yêu cầu đang chờ</h4>
+      <p>{{ pending_requests }}</p>
     </div>
   </div>
 
   <h3>Tỷ lệ tài sản theo trạng thái</h3>
-  <div style="width: 250px; margin: 0 auto;">
+  <div class="chart-container">
     <canvas id="statusChart"></canvas>
   </div>
+</div>
 
-  <script>
-    const data = {
-      labels: ['Sẵn sàng','Đang bảo trì','Đã hỏng'],
-      datasets: [{
-        data: [{{ status_counts.ready }}, {{ status_counts.maint }}, {{ status_counts.broken }}],
-        backgroundColor: ['#4caf50','#ff9800','#f44336'],
-      }]
-    };
-    const ctx = document.getElementById('statusChart').getContext('2d');
-    new Chart(ctx, { type: 'pie', data: data });
-  </script>
-
+<script>
+  const data = {
+    labels: ['Sẵn sàng','Đang bảo trì','Đã hỏng'],
+    datasets: [{
+      data: [{{ status_counts.ready }}, {{ status_counts.maint }}, {{ status_counts.broken }}],
+      backgroundColor: ['#4caf50','#ff9800','#f44336'],
+    }]
+  };
+  const ctx = document.getElementById('statusChart').getContext('2d');
+  new Chart(ctx, { type: 'pie', data: data });
+</script>
 {% endblock %}

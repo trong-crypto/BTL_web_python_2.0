@@ -95,26 +95,78 @@ def building_delete(request, pk):
 
 @login_required
 def maintenance_create(request):
+    """
+    Tạo yêu cầu bảo trì.
+    Nhận equipment_id từ GET parameters: ?equipment_id=50
+    """
+    # Accept different query param names used in templates / links.
+    # Links may use ?equipment=.. or ?equipment_id=.. and/or provide building, floor, room IDs.
+    equipment_param = request.GET.get('equipment') or request.GET.get('equipment_id')
+    equipment = None
+    current_room = None
+    current_floor = None
+    current_building = None
+
+    if equipment_param:
+        try:
+            equipment = get_object_or_404(Equipment, pk=int(equipment_param))
+            current_room = equipment.room
+            current_floor = current_room.floor
+            current_building = current_floor.building
+        except (Equipment.DoesNotExist, ValueError):
+            equipment = None
+    else:
+        # Maybe the link provided all four IDs: building, floor, room, equipment
+        b_id = request.GET.get('building')
+        f_id = request.GET.get('floor')
+        r_id = request.GET.get('room')
+        e_id = request.GET.get('equipment')
+        try:
+            if b_id and f_id and r_id and e_id:
+                current_building = get_object_or_404(Building, pk=int(b_id))
+                current_floor = get_object_or_404(Floor, pk=int(f_id))
+                current_room = get_object_or_404(Room, pk=int(r_id))
+                equipment = get_object_or_404(Equipment, pk=int(e_id))
+        except (Building.DoesNotExist, Floor.DoesNotExist, Room.DoesNotExist, Equipment.DoesNotExist, ValueError):
+            # ignore prefill if any id is invalid
+            equipment = None
+            current_room = None
+            current_floor = None
+            current_building = None
+
     if request.method == 'POST':
         form = MaintenanceRequestForm(request.POST)
         if form.is_valid():
             req = form.save(commit=False)
             req.created_by = request.user
             req.save()
-            # mark equipment status to maintenance
-            equipment = req.equipment
-            # If the user clicked the "broken" button, mark equipment as broken;
-            # otherwise mark it as under maintenance.
+
+            # Cập nhật trạng thái thiết bị
+            eq = req.equipment
             if request.POST.get('broken'):
-                equipment.status = Equipment.STATUS_BROKEN
+                eq.status = Equipment.STATUS_BROKEN
             else:
-                equipment.status = Equipment.STATUS_MAINT
-            equipment.save()
+                eq.status = Equipment.STATUS_MAINT
+            eq.save()
+
+            messages.success(request, 'Đã gửi yêu cầu bảo trì!')
             return redirect('maintenance_list')
     else:
-        form = MaintenanceRequestForm()
+        # Nếu đã có thiết bị chọn sẵn thì pre-fill form
+        if equipment:
+            form = MaintenanceRequestForm(initial={'equipment': equipment})
+        else:
+            form = MaintenanceRequestForm()
+
     buildings = Building.objects.all()
-    return render(request, 'core/maintenance_form.html', {'form': form, 'buildings': buildings})
+    return render(request, 'core/maintenance_form.html', {
+        'form': form,
+        'buildings': buildings,
+        'current_equipment': equipment,
+        'current_room': current_room,
+        'current_floor': current_floor,
+        'current_building': current_building,
+    })
 
 
 def api_floors(request):
@@ -139,6 +191,16 @@ def api_equipments(request):
         return JsonResponse({'error': 'missing room id'}, status=400)
     equipments = Equipment.objects.filter(room_id=room_id).values('id', 'code', 'name', 'status')
     return JsonResponse(list(equipments), safe=False)
+
+
+def api_status_counts(request):
+    """Return JSON counts of equipment statuses for the dashboard to poll."""
+    counts = {
+        'ready': Equipment.objects.filter(status=Equipment.STATUS_READY).count(),
+        'maint': Equipment.objects.filter(status=Equipment.STATUS_MAINT).count(),
+        'broken': Equipment.objects.filter(status=Equipment.STATUS_BROKEN).count(),
+    }
+    return JsonResponse(counts)
 
 
 @login_required

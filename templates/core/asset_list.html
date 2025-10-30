@@ -1,21 +1,152 @@
 {% extends 'core/base.html' %}
+
 {% block content %}
-  <h2>Danh sách tài sản</h2>
+<style>
+/* 🌟 Hiệu ứng xuất hiện */
+.container {
+  animation: fadeIn 0.4s ease-in-out;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* 🔴 Tiêu đề */
+h2 {
+  color: #d62828;
+  font-weight: 700;
+  margin-bottom: 1.2rem;
+  font-size: 1.8rem;
+}
+
+/* 🔘 Nút thêm tài sản */
+.button {
+  display: inline-block;
+  background-color: #d62828;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.25s ease-in-out;
+  box-shadow: 0 2px 6px rgba(214, 40, 40, 0.25);
+}
+.button:hover {
+  background-color: #b91c1c;
+  box-shadow: 0 4px 10px rgba(214, 40, 40, 0.35);
+}
+
+/* 📋 Bảng */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1.2rem;
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+  animation: fadeIn 0.6s ease-in-out;
+}
+
+/* Header bảng */
+thead {
+  background-color: #d62828;
+  color: white;
+}
+th {
+  padding: 12px 16px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-align: left;
+  letter-spacing: 0.3px;
+}
+
+/* Dòng dữ liệu */
+td {
+  padding: 12px 16px;
+  border-top: 1px solid #f3f4f6;
+  font-size: 0.94rem;
+  color: #374151;
+}
+
+/* Hover trên hàng */
+tbody tr:hover {
+  background-color: #fff0f0;
+  transition: 0.25s;
+}
+
+/* Liên kết thao tác */
+td a {
+  color: #d62828;
+  text-decoration: none;
+  font-weight: 500;
+  margin: 0 6px;
+}
+td a:hover {
+  color: #b91c1c;
+  text-decoration: underline;
+}
+
+/* Dòng trống */
+tbody tr td[colspan] {
+  text-align: center;
+  color: #9ca3af;
+  font-style: italic;
+  padding: 20px;
+}
+
+/* 📱 Responsive */
+@media (max-width: 768px) {
+  table, thead, tbody, th, td, tr {
+    display: block;
+  }
+  thead { display: none; }
+  tr {
+    margin-bottom: 15px;
+    border: 1px solid #f3f4f6;
+    border-radius: 10px;
+    padding: 8px 10px;
+    box-shadow: 0 2px 6px rgba(214, 40, 40, 0.08);
+  }
+  td {
+    border: none;
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 10px;
+  }
+  td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #b91c1c;
+  }
+}
+</style>
+
+<div class="container mt-4">
+  <h2>📦 Danh sách tài sản</h2>
+
   {% if user.is_superuser %}
-    <a class="button" href="{% url 'asset_create' %}">Thêm tài sản</a>
+    <a class="button" href="{% url 'asset_create' %}">➕ Thêm tài sản</a>
   {% endif %}
+
   <table>
     <thead>
-      <tr><th>Mã</th><th>Tên</th><th>Vị trí</th><th>Trạng thái</th><th></th></tr>
+      <tr>
+        <th>Mã</th>
+        <th>Tên</th>
+        <th>Vị trí</th>
+        <th>Trạng thái</th>
+        <th>Thao tác</th>
+      </tr>
     </thead>
     <tbody>
       {% for a in assets %}
         <tr>
-          <td>{{ a.code }}</td>
-          <td>{{ a.name }}</td>
-          <td>{{ a.location }}</td>
-          <td>{{ a.get_status_display }}</td>
-          <td>
+          <td data-label="Mã">{{ a.code }}</td>
+          <td data-label="Tên">{{ a.name }}</td>
+          <td data-label="Vị trí">{{ a.location }}</td>
+          <td data-label="Trạng thái">{{ a.get_status_display }}</td>
+          <td data-label="Thao tác">
             {% if user.is_superuser %}
               <a href="{% url 'asset_edit' a.pk %}">Sửa</a> |
               <a href="{% url 'asset_delete' a.pk %}">Xóa</a>
@@ -27,4 +158,5 @@
       {% endfor %}
     </tbody>
   </table>
+</div>
 {% endblock %}

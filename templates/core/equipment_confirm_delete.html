@@ -1,9 +1,89 @@
 {% extends 'core/base.html' %}
+
+{% block title %}Xác nhận xóa thiết bị{% endblock %}
+
 {% block content %}
-  <h2>Xác nhận xóa thiết bị</h2>
-  <p>Bạn có chắc muốn xóa: <strong>{{ equipment }}</strong> ?</p>
-  <form method="post">{% csrf_token %}
-    <button type="submit">Xóa</button>
-    <a href="{% url 'equipment_list' equipment.room.pk %}">Hủy</a>
-  </form>
+<style>
+/* ===== Trang Xác Nhận Xóa Thiết Bị ===== */
+.delete-confirm-container {
+    max-width: 550px;
+    margin: 80px auto;
+    padding: 35px 30px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 6px 25px rgba(255, 0, 0, 0.15);
+    animation: fadeIn 0.4s ease-in-out;
+    text-align: center;
+}
+
+/* Hiệu ứng xuất hiện */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Tiêu đề */
+.delete-confirm-container h2 {
+    color: #dc3545;
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+
+/* Đoạn cảnh báo */
+.delete-confirm-container p {
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 25px;
+}
+
+.delete-confirm-container strong {
+    color: #000;
+}
+
+/* Nút hành động */
+.delete-confirm-container button,
+.delete-confirm-container a {
+    display: inline-block;
+    margin: 5px 10px;
+    padding: 10px 20px;
+    font-size: 1rem;
+    border-radius: 10px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease-in-out;
+}
+
+/* Nút xóa */
+.delete-confirm-container button {
+    background-color: #dc3545;
+    border: none;
+    color: white;
+}
+
+.delete-confirm-container button:hover {
+    background-color: #b02a37;
+}
+
+/* Nút hủy */
+.delete-confirm-container a {
+    background-color: #6c757d;
+    color: white;
+}
+
+.delete-confirm-container a:hover {
+    background-color: #565e64;
+}
+</style>
+
+<div class="delete-confirm-container">
+    <h2>⚠️ Xác nhận xóa thiết bị</h2>
+    <p>Bạn có chắc chắn muốn xóa thiết bị: <strong>{{ equipment }}</strong> không?<br>
+    Hành động này <span style="color: #dc3545; font-weight: 600;">không thể hoàn tác</span>.</p>
+
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit">🗑️ Xóa</button>
+        <a href="{% url 'equipment_list' equipment.room.pk %}">✖️ Hủy</a>
+    </form>
+</div>
 {% endblock %}

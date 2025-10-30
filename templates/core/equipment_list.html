@@ -1,16 +1,98 @@
 {% extends 'core/base.html' %}
 {% block content %}
+<style>
+  .equipment-container {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 0 10px rgba(200, 0, 0, 0.2);
+    max-width: 700px;
+    margin: 30px auto;
+    font-family: Arial, sans-serif;
+  }
+
+  h2 {
+    color: #b30000;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .button {
+    display: inline-block;
+    background-color: #b30000;
+    color: white;
+    padding: 8px 14px;
+    text-decoration: none;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    transition: background 0.3s;
+  }
+
+  .button:hover {
+    background-color: #e60000;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  li {
+    background-color: #fff5f5;
+    margin: 8px 0;
+    padding: 10px 12px;
+    border-left: 5px solid #b30000;
+    border-radius: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  li strong {
+    color: #a00000;
+  }
+
+  li a {
+    color: #b30000;
+    text-decoration: none;
+    margin-left: 8px;
+  }
+
+  li a:hover {
+    text-decoration: underline;
+  }
+
+  .empty {
+    color: #666;
+    text-align: center;
+    margin-top: 20px;
+  }
+</style>
+
+<div class="equipment-container">
   <h2>Thiết bị - Phòng {{ room.code }} (Tầng {{ room.floor.number }})</h2>
+
   {% if user.is_superuser %}
-    <a class="button" href="{% url 'equipment_create' room.pk %}">Thêm thiết bị</a>
+    <a class="button" href="{% url 'equipment_create' room.pk %}">+ Thêm thiết bị</a>
   {% endif %}
+
   <ul>
     {% for e in equipments %}
-      <li>{{ e.code }} {{ e.name }} - {{ e.get_status_display }}
-        {% if user.is_superuser %} | <a href="{% url 'equipment_edit' e.pk %}">Sửa</a> | <a href="{% url 'equipment_delete' e.pk %}">Xóa</a>{% endif %}
+      <li>
+        <div>
+          <strong>{{ e.code }}</strong> - {{ e.name }}  
+          ({{ e.get_status_display }})
+        </div>
+        {% if user.is_superuser %}
+          <div>
+            <a href="{% url 'equipment_edit' e.pk %}">Sửa</a> |
+            <a href="{% url 'equipment_delete' e.pk %}">Xóa</a>
+          </div>
+        {% endif %}
       </li>
     {% empty %}
-      <li>Không có thiết bị</li>
+      <p class="empty">Không có thiết bị</p>
     {% endfor %}
   </ul>
+</div>
 {% endblock %}

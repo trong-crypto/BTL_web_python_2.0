@@ -1,16 +1,104 @@
 {% extends 'core/base.html' %}
 {% block content %}
+<style>
+  /* ======= Danh sách phòng ======= */
+  .room-list-container {
+    max-width: 850px;
+    margin: 50px auto;
+    background: #fff;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 6px 20px rgba(200, 0, 0, 0.15);
+    font-family: Arial, sans-serif;
+  }
+
+  .room-list-container h2 {
+    color: #b30000;
+    text-align: center;
+    font-weight: 700;
+    margin-bottom: 25px;
+  }
+
+  .add-button {
+    display: inline-block;
+    background-color: #b30000;
+    color: #fff;
+    padding: 10px 18px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: background 0.3s;
+    margin-bottom: 20px;
+  }
+
+  .add-button:hover {
+    background-color: #e60000;
+  }
+
+  ul.room-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  ul.room-list li {
+    background-color: #fafafa;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: box-shadow 0.2s;
+  }
+
+  ul.room-list li:hover {
+    box-shadow: 0 3px 10px rgba(179, 0, 0, 0.1);
+  }
+
+  .room-actions a {
+    color: #b30000;
+    text-decoration: none;
+    font-weight: 600;
+    margin: 0 5px;
+  }
+
+  .room-actions a:hover {
+    text-decoration: underline;
+  }
+
+  .empty {
+    text-align: center;
+    color: #777;
+    padding: 15px;
+  }
+</style>
+
+<div class="room-list-container">
   <h2>Phòng - Tầng {{ floor.number }} ({{ floor.building.name }})</h2>
+
   {% if user.is_superuser %}
-    <a class="button" href="{% url 'room_create' floor.pk %}">Thêm phòng</a>
+    <a class="add-button" href="{% url 'room_create' floor.pk %}">➕ Thêm phòng</a>
   {% endif %}
-  <ul>
+
+  <ul class="room-list">
     {% for r in rooms %}
-      <li>{{ r.code }} {{ r.name }} - <a href="{% url 'equipment_list' r.pk %}">Xem thiết bị</a>
-        {% if user.is_superuser %} | <a href="{% url 'room_edit' r.pk %}">Sửa</a> | <a href="{% url 'room_delete' r.pk %}">Xóa</a>{% endif %}
+      <li>
+        <div>
+          <strong>{{ r.code }}</strong> - {{ r.name }}
+        </div>
+        <div class="room-actions">
+          <a href="{% url 'equipment_list' r.pk %}">🔧 Xem thiết bị</a>
+          {% if user.is_superuser %}
+            | <a href="{% url 'room_edit' r.pk %}">✏️ Sửa</a>
+            | <a href="{% url 'room_delete' r.pk %}">🗑️ Xóa</a>
+          {% endif %}
+        </div>
       </li>
     {% empty %}
-      <li>Không có phòng</li>
+      <li class="empty">Không có phòng</li>
     {% endfor %}
   </ul>
+</div>
 {% endblock %}

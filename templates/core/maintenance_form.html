@@ -1,7 +1,101 @@
 {% extends 'core/base.html' %}
 {% block content %}
-  <h2>Tạo yêu cầu bảo trì</h2>
-  <form method="post" id="maintForm">{% csrf_token %}
+<style>
+/* ===== Form Tạo Yêu Cầu Bảo Trì ===== */
+.maint-form-container {
+  max-width: 700px;
+  margin: 50px auto;
+  background: #fff;
+  padding: 35px 30px;
+  border-radius: 14px;
+  box-shadow: 0 6px 20px rgba(179, 0, 0, 0.2);
+  font-family: "Segoe UI", sans-serif;
+  animation: fadeIn 0.4s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Tiêu đề */
+.maint-form-container h2 {
+  text-align: center;
+  color: #b30000;
+  margin-bottom: 25px;
+  font-weight: 700;
+}
+
+/* Label và select */
+.maint-form-container label {
+  display: block;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 6px;
+}
+
+.maint-form-container select,
+.maint-form-container textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 15px;
+  margin-bottom: 18px;
+  transition: border-color 0.3s ease;
+}
+
+.maint-form-container select:focus,
+.maint-form-container textarea:focus {
+  border-color: #b30000;
+  outline: none;
+}
+
+/* Nút */
+.maint-form-container button {
+  background-color: #b30000;
+  color: #fff;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.maint-form-container button:hover {
+  background-color: #e60000;
+  transform: scale(1.03);
+}
+
+.maint-form-container button[name="broken"] {
+  background-color: #ff4d4d;
+}
+
+.maint-form-container button[name="broken"]:hover {
+  background-color: #ff1a1a;
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+  .maint-form-container {
+    padding: 25px 20px;
+  }
+}
+</style>
+
+<div class="maint-form-container">
+  <h2>🛠️ Tạo yêu cầu bảo trì</h2>
+  <form method="post" id="maintForm">
+    {% csrf_token %}
+    
+    <div id="prefillSummary" style="display:none; margin-bottom:16px; background:#fff3f3; padding:12px; border-radius:8px;">
+      <strong>Thiết bị được chọn sẵn:</strong>
+      <div id="prefillText"></div>
+    </div>
+
+    <div id="selectsArea">
     <label>Chọn tòa nhà</label>
     <select id="buildingSelect">
       <option value="">-- chọn --</option>
@@ -25,73 +119,110 @@
       <option value="">-- chọn --</option>
     </select>
 
-  {{ form.description }}
-  <input type="hidden" name="equipment" id="equipmentHidden" />
+    </div> {# end selectsArea #}
 
-    <button type="submit">Gửi</button>
-    <button type="submit" name="broken" value="1" style="margin-left:8px;">Báo hỏng</button>
+    {{ form.description }}
+    <input type="hidden" name="equipment" id="equipmentHidden" />
+
+    <div style="display: flex; justify-content: flex-end; gap: 10px;">
+      <button type="submit">Gửi yêu cầu</button>
+      <button type="submit" name="broken" value="1">Báo hỏng</button>
+    </div>
   </form>
+</div>
 
-  <script>
-    const buildingSelect = document.getElementById('buildingSelect');
-    const floorSelect = document.getElementById('floorSelect');
-    const roomSelect = document.getElementById('roomSelect');
-    const equipmentSelect = document.getElementById('equipmentSelect');
-  const equipmentHidden = document.getElementById('equipmentHidden');
+<script>
+const buildingSelect = document.getElementById('buildingSelect');
+const floorSelect = document.getElementById('floorSelect');
+const roomSelect = document.getElementById('roomSelect');
+const equipmentSelect = document.getElementById('equipmentSelect');
+const equipmentHidden = document.getElementById('equipmentHidden');
+const prefillSummary = document.getElementById('prefillSummary');
+const prefillText = document.getElementById('prefillText');
+const selectsArea = document.getElementById('selectsArea');
 
-    buildingSelect.addEventListener('change', async () => {
-      floorSelect.innerHTML = '<option value="">-- chọn --</option>';
-      roomSelect.innerHTML = '<option value="">-- chọn --</option>';
-      equipmentSelect.innerHTML = '<option value="">-- chọn --</option>';
-      floorSelect.disabled = true; roomSelect.disabled = true; equipmentSelect.disabled = true;
-      const b = buildingSelect.value;
-      if (!b) return;
-      const res = await fetch(`/api/floors/?building=${b}`);
-      const floors = await res.json();
-      floors.forEach(f => {
-        const opt = document.createElement('option'); opt.value = f.id; opt.textContent = `Tầng ${f.number} ${f.name || ''}`;
-        floorSelect.appendChild(opt);
-      });
-      floorSelect.disabled = false;
-    });
+// server-provided prefill values
+const PREFILLED = {% if current_equipment %}true{% else %}false{% endif %};
+const PREF_BUILDING_ID = {% if current_building %}{{ current_building.pk }}{% else %}null{% endif %};
+const PREF_FLOOR_ID = {% if current_floor %}{{ current_floor.pk }}{% else %}null{% endif %};
+const PREF_ROOM_ID = {% if current_room %}{{ current_room.pk }}{% else %}null{% endif %};
+const PREF_EQUIP_ID = {% if current_equipment %}{{ current_equipment.pk }}{% else %}null{% endif %};
+const PREF_BUILDING_NAME = {% if current_building %}'{{ current_building.name|escapejs }}'{% else %}null{% endif %};
+const PREF_FLOOR_NAME = {% if current_floor %}'{{ current_floor.name|escapejs }}'{% else %}null{% endif %};
+const PREF_ROOM_NAME = {% if current_room %}'{{ current_room.name|escapejs }}'{% else %}null{% endif %};
+const PREF_EQUIP_NAME = {% if current_equipment %}'{{ current_equipment.name|escapejs }}'{% else %}null{% endif %};
 
-    floorSelect.addEventListener('change', async () => {
-      roomSelect.innerHTML = '<option value="">-- chọn --</option>';
-      equipmentSelect.innerHTML = '<option value="">-- chọn --</option>';
-      roomSelect.disabled = true; equipmentSelect.disabled = true;
-      const f = floorSelect.value;
-      if (!f) return;
-      const res = await fetch(`/api/rooms/?floor=${f}`);
-      const rooms = await res.json();
-      rooms.forEach(r => {
-        const opt = document.createElement('option'); opt.value = r.id; opt.textContent = `${r.code} ${r.name || ''}`;
-        roomSelect.appendChild(opt);
-      });
-      roomSelect.disabled = false;
-    });
+// If the view provided a pre-selected equipment, show a compact summary and hide the selects
+if (PREFILLED) {
+  prefillSummary.style.display = 'block';
+  selectsArea.style.display = 'none';
+  prefillText.innerHTML = `Tòa nhà: <strong>${PREF_BUILDING_NAME}</strong><br/>Tầng: <strong>${PREF_FLOOR_NAME}</strong><br/>Phòng: <strong>${PREF_ROOM_NAME}</strong><br/>Thiết bị: <strong>${PREF_EQUIP_NAME}</strong>`;
+  equipmentHidden.value = PREF_EQUIP_ID;
+}
 
-    roomSelect.addEventListener('change', async () => {
-      equipmentSelect.innerHTML = '<option value="">-- chọn --</option>';
-      equipmentSelect.disabled = true;
-      const r = roomSelect.value;
-      if (!r) return;
-      const res = await fetch(`/api/equipments/?room=${r}`);
-      const equips = await res.json();
-      equips.forEach(e => {
-        const opt = document.createElement('option'); opt.value = e.id; opt.textContent = `${e.code} ${e.name || ''} (${e.status})`;
-        equipmentSelect.appendChild(opt);
-      });
-      equipmentSelect.disabled = false;
-    });
+buildingSelect.addEventListener('change', async () => {
+  floorSelect.innerHTML = '<option value="">-- chọn --</option>';
+  roomSelect.innerHTML = '<option value="">-- chọn --</option>';
+  equipmentSelect.innerHTML = '<option value="">-- chọn --</option>';
+  floorSelect.disabled = true; roomSelect.disabled = true; equipmentSelect.disabled = true;
+  const b = buildingSelect.value;
+  if (!b) return;
+  const res = await fetch(`/api/floors/?building=${b}`);
+  const floors = await res.json();
+  floors.forEach(f => {
+    const opt = document.createElement('option'); 
+    opt.value = f.id; 
+    opt.textContent = `Tầng ${f.number} ${f.name || ''}`;
+    floorSelect.appendChild(opt);
+  });
+  floorSelect.disabled = false;
+});
 
-    document.getElementById('maintForm').addEventListener('submit', (ev) => {
-      const val = equipmentSelect.value;
-      if (!val) {
-        ev.preventDefault();
-        alert('Vui lòng chọn thiết bị');
-        return false;
-      }
-      equipmentHidden.value = val;
-    });
-  </script>
+floorSelect.addEventListener('change', async () => {
+  roomSelect.innerHTML = '<option value="">-- chọn --</option>';
+  equipmentSelect.innerHTML = '<option value="">-- chọn --</option>';
+  roomSelect.disabled = true; equipmentSelect.disabled = true;
+  const f = floorSelect.value;
+  if (!f) return;
+  const res = await fetch(`/api/rooms/?floor=${f}`);
+  const rooms = await res.json();
+  rooms.forEach(r => {
+    const opt = document.createElement('option'); 
+    opt.value = r.id; 
+    opt.textContent = `${r.code} ${r.name || ''}`;
+    roomSelect.appendChild(opt);
+  });
+  roomSelect.disabled = false;
+});
+
+roomSelect.addEventListener('change', async () => {
+  equipmentSelect.innerHTML = '<option value="">-- chọn --</option>';
+  equipmentSelect.disabled = true;
+  const r = roomSelect.value;
+  if (!r) return;
+  const res = await fetch(`/api/equipments/?room=${r}`);
+  const equips = await res.json();
+  equips.forEach(e => {
+    const opt = document.createElement('option'); 
+    opt.value = e.id; 
+    opt.textContent = `${e.code} ${e.name || ''} (${e.status})`;
+    equipmentSelect.appendChild(opt);
+  });
+  equipmentSelect.disabled = false;
+});
+
+document.getElementById('maintForm').addEventListener('submit', (ev) => {
+  if (PREFILLED) {
+    // already set
+    return true;
+  }
+  const val = equipmentSelect.value;
+  if (!val) {
+    ev.preventDefault();
+    alert('Vui lòng chọn thiết bị');
+    return false;
+  }
+  equipmentHidden.value = val;
+});
+</script>
 {% endblock %}

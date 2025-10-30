@@ -22,6 +22,8 @@ urlpatterns = [
     path('rooms/<int:room_pk>/equipments/create/', views.equipment_create, name='equipment_create'),
     path('equipments/<int:pk>/edit/', views.equipment_edit, name='equipment_edit'),
     path('equipments/<int:pk>/delete/', views.equipment_delete, name='equipment_delete'),
+    
+    # CHỈ GIỮ LẠI 1 ĐƯỜNG DẪN DUY NHẤT
     path('maintenance/create/', views.maintenance_create, name='maintenance_create'),
     path('maintenance/', views.maintenance_list, name='maintenance_list'),
     path('maintenance/<int:pk>/update/', views.maintenance_update, name='maintenance_update'),
@@ -36,6 +38,7 @@ urlpatterns = [
     path('api/floors/', views.api_floors, name='api_floors'),
     path('api/rooms/', views.api_rooms, name='api_rooms'),
     path('api/equipments/', views.api_equipments, name='api_equipments'),
+    path('api/status_counts/', views.api_status_counts, name='api_status_counts'),
     path('register/', views.register, name='register'),
     path('users/', views.user_list, name='user_list'),
     path('users/<int:user_id>/assign/', views.assign_role, name='assign_role'),

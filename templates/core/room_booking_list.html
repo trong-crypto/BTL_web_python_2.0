@@ -1,41 +1,109 @@
 {% extends 'core/base.html' %}
-
 {% block content %}
-<div class="container mt-4">
-    <h2>📋 Lịch sử đặt phòng</h2>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Phòng</th>
-                <th>Người đặt</th>
-                <th>Thời gian</th>
-                <th>Trạng thái</th>
-                <th>Thao tác</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for booking in bookings %}
-            <tr>
-                <td>{{ booking.room.name }}</td>
-                <td>{{ booking.user.username }}</td>
-                <td>{{ booking.start_time|date:"d/m/Y H:i" }} - {{ booking.end_time|date:"d/m/Y H:i" }}</td>
-                <td>
-                    <span class="badge 
-                        {% if booking.status == 'approved' %}bg-success
-                        {% elif booking.status == 'pending' %}bg-warning
-                        {% elif booking.status == 'rejected' %}bg-danger
-                        {% else %}bg-secondary{% endif %}">
-                        {{ booking.get_status_display }}
-                    </span>
-                </td>
-                <td>
-                    {% if user.is_superuser %}
-                    <a href="{% url 'room_booking_update' booking.pk %}" class="btn btn-sm btn-outline-primary">Duyệt</a>
-                    {% endif %}
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<style>
+  .history-container {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 0 10px rgba(200, 0, 0, 0.15);
+    max-width: 1000px;
+    margin: 40px auto;
+    font-family: Arial, sans-serif;
+  }
+
+  h2 {
+    color: #b30000;
+    text-align: center;
+    margin-bottom: 25px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th, td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+  }
+
+  th {
+    background-color: #b30000;
+    color: white;
+  }
+
+  tr:hover {
+    background-color: #f9f9f9;
+  }
+
+  .badge {
+    padding: 6px 10px;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 14px;
+    font-weight: bold;
+  }
+
+  .bg-success { background-color: #28a745; }
+  .bg-warning { background-color: #ffc107; color: #000; }
+  .bg-danger  { background-color: #dc3545; }
+  .bg-secondary { background-color: #6c757d; }
+
+  .btn {
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid #b30000;
+    background-color: white;
+    color: #b30000;
+    text-decoration: none;
+    transition: 0.3s;
+    font-size: 14px;
+  }
+
+  .btn:hover {
+    background-color: #b30000;
+    color: white;
+  }
+</style>
+
+<div class="history-container">
+  <h2>📋 Lịch sử đặt phòng</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Phòng</th>
+        <th>Người đặt</th>
+        <th>Thời gian</th>
+        <th>Trạng thái</th>
+        <th>Thao tác</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for booking in bookings %}
+      <tr>
+        <td>{{ booking.room.name }}</td>
+        <td>{{ booking.user.username }}</td>
+        <td>{{ booking.start_time|date:"d/m/Y H:i" }} - {{ booking.end_time|date:"d/m/Y H:i" }}</td>
+        <td>
+          <span class="badge 
+            {% if booking.status == 'approved' %}bg-success
+            {% elif booking.status == 'pending' %}bg-warning
+            {% elif booking.status == 'rejected' %}bg-danger
+            {% else %}bg-secondary{% endif %}">
+            {{ booking.get_status_display }}
+          </span>
+        </td>
+        <td>
+          {% if user.is_superuser %}
+          <a href="{% url 'room_booking_update' booking.pk %}" class="btn">Duyệt</a>
+          {% endif %}
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5" style="text-align:center; color:#777;">Không có lịch sử đặt phòng</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </div>
 {% endblock %}

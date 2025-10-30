@@ -1,12 +1,111 @@
 {% extends 'core/base.html' %}
+
+{% block title %}Gán vai trò cho {{ user_obj.username }}{% endblock %}
+
 {% block content %}
-  <h2>Gán vai trò cho {{ user_obj.username }}</h2>
-  <form method="post">{% csrf_token %}
+<style>
+/* 🌟 Hiệu ứng xuất hiện */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* 🎯 Container */
+.assign-role-container {
+  max-width: 480px;
+  margin: 60px auto;
+  padding: 32px;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.08);
+  animation: fadeIn 0.4s ease-in-out;
+  border-top: 5px solid #dc3545; /* 🔴 viền đỏ trên cùng */
+}
+
+/* 🧭 Tiêu đề */
+.assign-role-container h2 {
+  text-align: center;
+  font-weight: 700;
+  color: #dc3545; /* 🔴 tiêu đề đỏ nổi bật */
+  margin-bottom: 25px;
+  font-size: 1.6rem;
+}
+
+/* 🏷 Label */
+.assign-role-container label {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+  display: block;
+}
+
+/* ⬇️ Select box */
+.assign-role-container select {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+  transition: 0.2s ease;
+}
+.assign-role-container select:focus {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.15);
+  outline: none;
+}
+
+/* 💾 Nút Lưu */
+.assign-role-container button {
+  margin-top: 20px;
+  width: 100%;
+  padding: 11px;
+  background: linear-gradient(90deg, #dc3545, #b02a37);
+  border: none;
+  color: white;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+.assign-role-container button:hover {
+  transform: translateY(-2px);
+  opacity: 0.95;
+  box-shadow: 0 4px 10px rgba(220, 53, 69, 0.3);
+}
+.assign-role-container button:active {
+  transform: scale(0.98);
+}
+
+/* 🔙 Link quay lại */
+.back-link {
+  display: block;
+  text-align: center;
+  margin-top: 16px;
+  color: #0d6efd;
+  text-decoration: none;
+  font-weight: 500;
+  transition: 0.2s ease;
+}
+.back-link:hover {
+  color: #004bb5;
+  text-decoration: underline;
+}
+</style>
+
+<div class="assign-role-container">
+  <h2>👤 Gán vai trò cho {{ user_obj.username }}</h2>
+
+  <form method="post">
+    {% csrf_token %}
     <label>Chọn vai trò</label>
     <select name="role">
-      <option value="User">User</option>
-      <option value="Admin">Admin</option>
+      <option value="User" {% if not user_obj.is_superuser %}selected{% endif %}>User</option>
+      <option value="Admin" {% if user_obj.is_superuser %}selected{% endif %}>Admin</option>
     </select>
-    <button type="submit">Lưu</button>
+    <button type="submit">💾 Lưu thay đổi</button>
   </form>
+
+  <a href="{% url 'user_list' %}" class="back-link">← Quay lại danh sách người dùng</a>
+</div>
 {% endblock %}

@@ -1,13 +1,120 @@
 {% extends 'core/base.html' %}
 
+{% block title %}Đặt phòng {{ room.name }}{% endblock %}
+
 {% block content %}
-<div class="container mt-4">
-    <h2>📅 Đặt phòng {{ room.name }}</h2>
-    <form method="post">
+<style>
+/* ===== Giao diện Đặt phòng (phiên bản đỏ) ===== */
+.container {
+  max-width: 650px;
+}
+
+.card {
+  border-radius: 18px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  border: none;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 20px rgba(255, 0, 0, 0.15);
+}
+
+.card-header {
+  background: linear-gradient(135deg, #dc3545, #ff4d4d);
+  font-weight: 600;
+  font-size: 1.3rem;
+  color: white;
+  padding: 1rem 1.5rem;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+.card-body {
+  padding: 1.8rem;
+  background: #fff;
+}
+
+form label {
+  font-weight: 500;
+  color: #333;
+  margin-top: 0.5rem;
+}
+
+form input,
+form select,
+form textarea {
+  border-radius: 10px !important;
+  border: 1px solid #ccc;
+  padding: 0.7rem 0.8rem;
+  width: 100%;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  font-size: 1rem;
+}
+
+form input:focus,
+form select:focus,
+form textarea:focus {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 0.1rem rgba(220, 53, 69, 0.25);
+  outline: none;
+}
+
+.btn {
+  border-radius: 12px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+}
+
+.btn-primary {
+  background-color: #dc3545;
+  border: none;
+}
+
+.btn-primary:hover {
+  background-color: #c82333;
+}
+
+.btn-outline-secondary {
+  border: 1px solid #6c757d;
+  color: #6c757d;
+}
+
+.btn-outline-secondary:hover {
+  background-color: #6c757d;
+  color: #fff;
+}
+</style>
+
+<div class="container mt-5 mb-5">
+  <div class="card shadow-lg">
+    <div class="card-header">
+      ❤️ Đặt phòng: {{ room.name }}
+    </div>
+
+    <div class="card-body">
+      <form method="post" class="needs-validation" novalidate>
         {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="btn btn-primary">Gửi yêu cầu</button>
-        <a href="{% url 'asset_room_detail' room.pk %}" class="btn btn-secondary">Hủy</a>
-    </form>
+        
+        <div class="mb-3">
+          {{ form.as_p }}
+        </div>
+
+        <div class="d-flex justify-content-end gap-2">
+          <a href="{% url 'asset_room_detail' room.pk %}" class="btn btn-outline-secondary px-4">
+            ❌ Hủy
+          </a>
+          <button type="submit" class="btn btn-primary px-4">
+            🚀 Gửi yêu cầu
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>
 {% endblock %}

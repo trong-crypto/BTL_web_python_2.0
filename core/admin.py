@@ -259,6 +259,24 @@ class MaintenanceRequestAdmin(admin.ModelAdmin):
     list_display = ('id', 'equipment', 'status', 'created_by', 'created_at')
     list_filter = ('status', 'equipment__room__floor__building')
     search_fields = ('equipment__name', 'description')
+    
+    def save_model(self, request, obj, form, change):
+        """Ensure equipment status stays in sync when admin edits a maintenance request."""
+        super().save_model(request, obj, form, change)
+        # If the maintenance request has an equipment, update its status based on request status
+        try:
+            eq = obj.equipment
+            if not eq:
+                return
+            if obj.status == MaintenanceRequest.STATUS_DONE:
+                eq.status = Equipment.STATUS_READY
+            else:
+                # For PENDING or IN_PROGRESS, mark equipment as under maintenance
+                eq.status = Equipment.STATUS_MAINT
+            eq.save()
+        except Exception:
+            # don't break admin if something odd happens
+            pass
 
 @admin.register(RoomBooking)
 class RoomBookingAdmin(admin.ModelAdmin):

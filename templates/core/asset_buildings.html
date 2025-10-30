@@ -1,34 +1,97 @@
-
-
 {% extends 'core/base.html' %}
 
 {% block title %}Tài sản - Danh sách Tòa nhà{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <h2 class="mb-4 text-primary"> Danh sách Tòa nhà</h2>
+<style>
+  .building-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+  }
 
-    {% if buildings %}
-    <div class="row">
-        {% for building in buildings %}
-        <div class="col-md-4 mb-4">
-            <div class="card shadow-sm h-100">
-                <div class="card-body">
-                    <h5 class="card-title text-dark">{{ building.name }}</h5>
-                    <p class="card-text"><strong>Mã:</strong> {{ building.code }}</p>
-                    {% if building.description %}
-                        <p class="card-text text-muted">{{ building.description }}</p>
-                    {% endif %}
-                    <a href="{% url 'asset_building_detail' building.pk %}" class="btn btn-outline-primary btn-sm">
-                        Xem chi tiết
-                    </a>
-                </div>
-            </div>
+  .building-card {
+    background: white;
+    border-radius: 14px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    padding: 20px;
+    transition: all 0.3s ease;
+    border: 1px solid #f0f0f0;
+  }
+
+  .building-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    border-color: #c62828;
+  }
+
+  .building-card h5 {
+    color: #b71c1c;
+    margin-bottom: 10px;
+    font-size: 20px;
+  }
+
+  .building-card p {
+    margin: 6px 0;
+    color: #555;
+    font-size: 15px;
+  }
+
+  .building-card .btn {
+    display: inline-block;
+    margin-top: 10px;
+    background-color: #d32f2f;
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background 0.3s;
+  }
+
+  .building-card .btn:hover {
+    background-color: #b71c1c;
+  }
+
+  .empty-alert {
+    background: #ffebee;
+    color: #b71c1c;
+    border-radius: 10px;
+    padding: 15px 20px;
+    font-weight: 500;
+    text-align: center;
+  }
+
+  h2.text-primary {
+    color: #d32f2f !important;
+    font-weight: 700;
+    margin-bottom: 25px;
+    border-left: 6px solid #d32f2f;
+    padding-left: 10px;
+  }
+</style>
+
+<div class="container mt-4">
+  <h2 class="text-primary">🏢 Danh sách Tòa nhà</h2>
+
+  {% if buildings %}
+    <div class="building-list">
+      {% for building in buildings %}
+        <div class="building-card">
+          <h5>{{ building.name }}</h5>
+          <p><strong>Mã:</strong> {{ building.code }}</p>
+          {% if building.description %}
+            <p>{{ building.description }}</p>
+          {% endif %}
+          <a href="{% url 'asset_building_detail' building.pk %}" class="btn">Xem chi tiết</a>
         </div>
-        {% endfor %}
+      {% endfor %}
     </div>
-    {% else %}
-    <div class="alert alert-info">Hiện chưa có tòa nhà nào trong hệ thống.</div>
-    {% endif %}
+  {% else %}
+    <div class="empty-alert">
+      Hiện chưa có tòa nhà nào trong hệ thống.
+    </div>
+  {% endif %}
 </div>
 {% endblock %}

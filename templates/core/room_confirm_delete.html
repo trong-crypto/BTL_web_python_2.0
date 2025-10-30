@@ -1,9 +1,75 @@
 {% extends 'core/base.html' %}
 {% block content %}
+<style>
+  .confirm-container {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 0 10px rgba(200, 0, 0, 0.15);
+    max-width: 500px;
+    margin: 60px auto;
+    font-family: Arial, sans-serif;
+    text-align: center;
+  }
+
+  h2 {
+    color: #b30000;
+    margin-bottom: 20px;
+  }
+
+  p {
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 30px;
+  }
+
+  strong {
+    color: #b30000;
+  }
+
+  form {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+  }
+
+  button {
+    background-color: #b30000;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 15px;
+    transition: background 0.3s;
+  }
+
+  button:hover {
+    background-color: #e60000;
+  }
+
+  a {
+    text-decoration: none;
+    color: #b30000;
+    padding: 10px 18px;
+    border: 1px solid #b30000;
+    border-radius: 6px;
+    transition: 0.3s;
+  }
+
+  a:hover {
+    background-color: #b30000;
+    color: white;
+  }
+</style>
+
+<div class="confirm-container">
   <h2>Xác nhận xóa phòng</h2>
   <p>Bạn có chắc muốn xóa: <strong>{{ room }}</strong> ?</p>
-  <form method="post">{% csrf_token %}
+  <form method="post">
+    {% csrf_token %}
     <button type="submit">Xóa</button>
     <a href="{% url 'room_list' room.floor.pk %}">Hủy</a>
   </form>
+</div>
 {% endblock %}

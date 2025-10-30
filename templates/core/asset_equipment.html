@@ -1,79 +1,211 @@
 {% extends 'core/base.html' %}
-
 {% block title %}{{ room.name }} - Danh sách thiết bị{% endblock %}
 
 {% block content %}
+<style>
+  /* --- Thông tin phòng --- */
+  .room-info {
+    background: white;
+    border-radius: 16px;
+    padding: 25px 30px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    margin-bottom: 25px;
+    border-left: 6px solid #d32f2f;
+  }
+
+  .room-info h2 {
+    color: #d32f2f;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .room-info h4, .room-info h5 {
+    color: #1f2937;
+    margin: 4px 0;
+  }
+
+  .room-info p {
+    color: #4b5563;
+    margin-bottom: 6px;
+  }
+
+  .btn-back {
+    background-color: #d32f2f;
+    color: white !important;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.3s;
+  }
+
+  .btn-back:hover {
+    background-color: #b71c1c;
+  }
+
+  /* --- Danh sách thiết bị --- */
+  .equipment-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+    gap: 20px;
+  }
+
+  .equipment-card {
+    background: white;
+    border-radius: 14px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    padding: 20px;
+    transition: all 0.3s ease;
+    border: 1px solid #f3f4f6;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .equipment-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+  }
+
+  .equipment-card h5 {
+    font-size: 18px;
+    color: #b71c1c;
+    margin-bottom: 10px;
+  }
+
+  .equipment-card p {
+    font-size: 14px;
+    color: #4b5563;
+    margin-bottom: 6px;
+  }
+
+  .card-footer {
+    margin-top: 12px;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .btn-sm {
+    padding: 7px 10px;
+    font-size: 13px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+  }
+
+  .btn-outline-primary {
+    border: 1px solid #d32f2f;
+    color: #d32f2f;
+  }
+  .btn-outline-primary:hover {
+    background-color: #d32f2f;
+    color: white;
+  }
+
+  .btn-warning {
+    background-color: #facc15;
+    color: #1f2937;
+    border: none;
+  }
+  .btn-warning:hover {
+    background-color: #eab308;
+  }
+
+  .btn-danger {
+    background-color: #ef4444;
+    color: white;
+    border: none;
+  }
+  .btn-danger:hover {
+    background-color: #dc2626;
+  }
+
+  .btn-success {
+    background-color: #16a34a;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: background 0.3s;
+  }
+  .btn-success:hover {
+    background-color: #15803d;
+  }
+
+  .alert-info {
+    background: #fee2e2;
+    color: #b91c1c;
+    border-radius: 10px;
+    padding: 15px;
+    font-weight: 500;
+    text-align: center;
+  }
+
+  @media (max-width: 768px) {
+    .room-info {
+      padding: 20px;
+    }
+    .equipment-list {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
 
 <div class="container mt-4">
 
-    <!-- Thông tin phòng -->
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <div>
-            <h2 class="text-primary mb-1"> {{ room.floor.building.name }}</h2>
-            <h4 class="text-dark mb-1">Tầng: {{ room.floor.name }}</h4>
-            <h5 class="text-dark mb-1">Phòng: {{ room.name }}</h5>
-            <p class="text-muted mb-0"><strong>Mã phòng:</strong> {{ room.code }}</p>
-            {% if room.description %}
-                <p class="text-muted">{{ room.description }}</p>
-            {% endif %}
-        </div>
-
-        <a href="{% url 'asset_floor_detail' room.floor.pk %}" class="btn btn-outline-secondary">
-            ← Quay lại danh sách phòng
-        </a>
+  <!-- Thông tin phòng -->
+  <div class="room-info d-flex justify-content-between align-items-start flex-wrap">
+    <div>
+      <h2>{{ room.floor.building.name }}</h2>
+      <h4>Tầng: {{ room.floor.name }}</h4>
+      <h5>Phòng: {{ room.name }}</h5>
+      <p><strong>Mã phòng:</strong> {{ room.code }}</p>
+      {% if room.description %}
+        <p>{{ room.description }}</p>
+      {% endif %}
     </div>
 
-    <hr>
-
-    <!-- Danh sách thiết bị -->
-    <h4 class="mb-3 text-dark"> Danh sách thiết bị</h4>
-
-    {% if equipments %}
-    <div class="row">
-        {% for equipment in equipments %}
-        <div class="col-md-4 mb-4">
-            <div class="card shadow-sm h-100">
-                <div class="card-body">
-                    <h5 class="card-title text-dark">{{ equipment.name }}</h5>
-                    <p class="card-text"><strong>Mã thiết bị:</strong> {{ equipment.code }}</p>
-                    {% if equipment.type %}
-                        <p class="card-text"><strong>Loại:</strong> {{ equipment.type }}</p>
-                    {% endif %}
-                    {% if equipment.status %}
-                        <p class="card-text"><strong>Tình trạng:</strong> {{ equipment.status }}</p>
-                    {% endif %}
-                    {% if equipment.description %}
-                        <p class="card-text text-muted">{{ equipment.description }}</p>
-                    {% endif %}
-                </div>
-
-                <div class="card-footer bg-light">
-                    <a href="{% url 'maintenance_create' %}?equipment_id={{ equipment.pk }}" class="btn btn-outline-primary btn-sm">
-                        Gửi yêu cầu bảo trì
-                    </a>
-                    {% if user.is_superuser %}
-                    <a href="{% url 'equipment_edit' equipment.pk %}" class="btn btn-warning btn-sm"> Sửa</a>
-                    <a href="{% url 'equipment_delete' equipment.pk %}" class="btn btn-danger btn-sm"
-                       onclick="return confirm('Bạn có chắc muốn xóa thiết bị này không?');">
-                         Xóa
-                    </a>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-        {% endfor %}
-    </div>
-    {% else %}
-    <div class="alert alert-info">
-        Phòng này chưa có thiết bị nào được thêm.
-    </div>
-    {% endif %}
-
-    {% if user.is_superuser %}
-    <a href="{% url 'equipment_create' room.pk %}" class="btn btn-success mt-3">
-        + Thêm thiết bị mới
+    <a href="{% url 'asset_floor_detail' room.floor.pk %}" class="btn-back mt-3 mt-md-0">
+      ← Quay lại danh sách phòng
     </a>
-    {% endif %}
+  </div>
+
+  <!-- Danh sách thiết bị -->
+  <h4 class="mb-3 text-dark">Danh sách thiết bị</h4>
+
+  {% if equipments %}
+  <div class="equipment-list">
+    {% for equipment in equipments %}
+    <div class="equipment-card">
+      <div>
+        <h5>{{ equipment.name }}</h5>
+        <p><strong>Mã:</strong> {{ equipment.code }}</p>
+        <p><strong>Trạng thái:</strong> {{ equipment.get_status_display }}</p>
+      </div>
+      <div class="card-footer">
+        <div style="display:flex; gap:8px; flex-wrap:wrap">
+          <a href="{% url 'maintenance_create' %}?building={{ room.floor.building.pk }}&amp;floor={{ room.floor.pk }}&amp;room={{ room.pk }}&amp;equipment={{ equipment.pk }}" class="btn-sm btn-success">Báo hỏng</a>
+          {% if user.is_superuser %}
+            <a href="{% url 'equipment_edit' equipment.pk %}" class="btn-sm btn-outline-primary">Sửa</a>
+            <a href="{% url 'equipment_delete' equipment.pk %}" class="btn-sm btn-danger">Xóa</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+    <div class="alert-info">Không có thiết bị nào trong phòng này.</div>
+  {% endif %}
+
+  {% if user.is_superuser %}
+  <div class="text-center mt-4">
+    <a href="{% url 'equipment_create' room.pk %}" class="btn-success">➕ Thêm thiết bị</a>
+  </div>
+  {% endif %}
 
 </div>
 {% endblock %}

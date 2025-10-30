@@ -1,0 +1,9 @@
+{% extends 'core/base.html' %}
+{% block content %}
+  <h2> Cập nhật trạng thái phòng - {{ room.name }}</h2>
+  <form method="post">{% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Lưu</button>
+    <a href="{% url 'asset_room_detail' room.pk %}" class="btn btn-secondary" style="margin-left:8px;">Hủy</a>
+  </form>
+{% endblock %}

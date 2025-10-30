@@ -6,25 +6,144 @@
     <title>Quản lý CSVC</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mini.css/3.0.1/mini-default.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+      /* ===== Tổng thể ===== */
+      body {
+        background: #fef2f2; /* đỏ nhạt nền trang */
+        font-family: "Segoe UI", Roboto, sans-serif;
+        margin: 0;
+        color: #333;
+      }
+
+      /* ===== Thanh header ===== */
+      header {
+        background: #dc2626; /* đỏ chính */
+        color: white;
+        padding: 15px 30px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      }
+
+      /* ===== Liên kết trong header ===== */
+      header a {
+        color: white;
+        text-decoration: none;
+        font-weight: 500;
+        margin: 0 10px;
+        transition: color 0.3s;
+      }
+
+      header a:hover {
+        color: #fee2e2; /* đỏ nhạt khi hover */
+      }
+
+      /* ===== Nút đăng xuất ===== */
+      header form button {
+        color: #fee2e2;
+        font-weight: 500;
+        border: none;
+        background: none;
+        cursor: pointer;
+        transition: color 0.3s;
+      }
+
+      header form button:hover {
+        color: #fff;
+        text-decoration: underline;
+      }
+
+      /* ===== Nội dung chính ===== */
+      main.container {
+        max-width: 1100px;
+        margin: 30px auto;
+        background: white;
+        padding: 30px;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        animation: fadeIn 0.4s ease-in-out;
+      }
+
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      h1, h2, h3 {
+        color: #991b1b; /* đỏ đậm cho tiêu đề */
+      }
+
+      /* ===== Nút chính ===== */
+      .btn-primary {
+        background-color: #dc2626;
+        color: white;
+        border: none;
+        padding: 10px 16px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.3s;
+      }
+
+      .btn-primary:hover {
+        background-color: #b91c1c;
+      }
+
+      /* ===== Footer ===== */
+      footer {
+        text-align: center;
+        padding: 15px;
+        color: #9ca3af;
+        font-size: 14px;
+        background: #fef2f2;
+        border-top: 1px solid #fca5a5;
+      }
+
+      /* ===== Responsive ===== */
+      @media (max-width: 768px) {
+        header {
+          flex-direction: column;
+          text-align: center;
+        }
+        main.container {
+          margin: 20px 10px;
+          padding: 20px;
+        }
+      }
+    </style>
   </head>
+
   <body>
     <header>
-      <a href="{% url 'dashboard' %}">Dashboard</a> |
-      <a href="{% url 'asset_hierarchy' %}">Tài sản</a> |
-      <a href="{% url 'room_booking_list' %}">Đặt phòng</a> |
-      <a href="{% url 'maintenance_list' %}">Yêu cầu bảo trì</a> |
-      {% if user.is_authenticated %}
-        Xin chào {{ user.username }} (
-          <form method="post" action="{% url 'logout' %}" style="display:inline">{% csrf_token %}
-            <button type="submit" style="background:none;border:none;padding:0;color:#06c;cursor:pointer">Đăng xuất</button>
+      <div class="nav-links">
+        <a href="{% url 'dashboard' %}">Dashboard</a>
+        <a href="{% url 'asset_hierarchy' %}">Tài sản</a>
+        <a href="{% url 'room_booking_list' %}">Đặt phòng</a>
+        <a href="{% url 'maintenance_list' %}">Bảo trì</a>
+      </div>
+
+      <div class="user-info">
+        {% if user.is_authenticated %}
+          Xin chào <strong>{{ user.username }}</strong> (
+          <form method="post" action="{% url 'logout' %}" style="display:inline">
+            {% csrf_token %}
+            <button type="submit">Đăng xuất</button>
           </form>
-        )
-      {% else %}
-        <a href="{% url 'login' %}">Đăng nhập</a>
-      {% endif %}
+          )
+        {% else %}
+          <a href="{% url 'login' %}">Đăng nhập</a>
+        {% endif %}
+      </div>
     </header>
+
     <main class="container">
       {% block content %}{% endblock %}
     </main>
+
+    <footer>
+      © 2025 Quản lý Cơ sở vật chất | PTIT
+    </footer>
   </body>
 </html>

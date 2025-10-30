@@ -1,8 +1,63 @@
 {% extends 'core/base.html' %}
 {% block content %}
+  <style>
+    h2 {
+      color: #d32f2f;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    table {
+      width: 80%;
+      margin: 0 auto;
+      border-collapse: collapse;
+      background-color: #fff;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    th {
+      background-color: #b71c1c;
+      color: white;
+      padding: 12px;
+      text-align: left;
+    }
+
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    tr:hover {
+      background-color: #ffe6e6;
+    }
+
+    a {
+      color: #d32f2f;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+  </style>
+
   <h2>Quản lý người dùng</h2>
   <table>
-    <thead><tr><th>Username</th><th>Email</th><th>Vai trò</th><th>Hành động</th></tr></thead>
+    <thead>
+      <tr>
+        <th>Username</th>
+        <th>Email</th>
+        <th>Vai trò</th>
+        <th>Hành động</th>
+      </tr>
+    </thead>
     <tbody>
       {% for u in users %}
         <tr>

@@ -1,18 +1,121 @@
 {% extends 'core/base.html' %}
+
+{% block title %}{{ building.name }} - Chi tiết tòa nhà{% endblock %}
+
 {% block content %}
-  <h2>{{ building.name }} ({{ building.code }})</h2>
-  {% if user.is_superuser %}
-    <a class="button" href="{% url 'floor_create' building.pk %}">Thêm tầng</a>
-  {% endif %}
-  <h3>Tầng</h3>
-  <ul>
-    {% for f in floors %}
-      <li>
-        Tầng {{ f.number }} {{ f.name }} - <a href="{% url 'room_list' f.pk %}">Xem phòng</a>
-        {% if user.is_superuser %} | <a href="{% url 'floor_edit' f.pk %}">Sửa</a> | <a href="{% url 'floor_delete' f.pk %}">Xóa</a>{% endif %}
-      </li>
-    {% empty %}
-      <li>Không có tầng</li>
-    {% endfor %}
-  </ul>
+<style>
+/* ===== Trang Chi Tiết Tòa Nhà - Chủ đề ĐỎ ===== */
+.building-detail-container {
+    max-width: 900px;
+    margin: 50px auto;
+    background: #fff;
+    padding: 30px 35px;
+    border-radius: 16px;
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.08);
+    animation: fadeIn 0.4s ease-in-out;
+}
+
+/* Hiệu ứng mượt khi load */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Tiêu đề */
+.building-detail-container h2 {
+    font-weight: 700;
+    color: #dc3545;
+    margin-bottom: 10px;
+}
+
+.building-detail-container h4 {
+    color: #b02a37;
+    font-weight: 600;
+}
+
+/* Nút thêm tầng (màu đỏ) */
+.building-detail-container .button {
+    display: inline-block;
+    background-color: #dc3545;
+    color: white;
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease-in-out;
+    margin-bottom: 20px;
+}
+.building-detail-container .button:hover {
+    background-color: #b02a37;
+}
+
+/* Danh sách tầng */
+.building-detail-container ul {
+    list-style: none;
+    padding: 0;
+    margin-top: 15px;
+}
+.building-detail-container ul li {
+    background: #fff5f5;
+    border: 1px solid #f3c2c2;
+    border-radius: 10px;
+    padding: 12px 18px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    transition: all 0.25s ease-in-out;
+}
+.building-detail-container ul li:hover {
+    transform: translateY(-3px);
+    background: #ffe9e9;
+    box-shadow: 0 4px 10px rgba(220,53,69,0.15);
+}
+
+/* Liên kết hành động */
+.building-detail-container a {
+    color: #dc3545;
+    text-decoration: none;
+    font-weight: 500;
+}
+.building-detail-container a:hover {
+    color: #b02a37;
+    text-decoration: underline;
+}
+
+/* Nút xóa tone đỏ */
+.building-detail-container a[href*="delete"] {
+    font-weight: 600;
+}
+
+/* Khi không có tầng */
+.building-detail-container li:last-child {
+    text-align: center;
+    font-style: italic;
+    color: #6c757d;
+}
+</style>
+
+<div class="building-detail-container">
+    <h2>{{ building.name }} ({{ building.code }})</h2>
+
+    {% if user.is_superuser %}
+      <a class="button" href="{% url 'floor_create' building.pk %}">+ Thêm tầng</a>
+    {% endif %}
+
+    <h4>Danh sách tầng</h4>
+    <ul>
+      {% for f in floors %}
+        <li>
+          🏢 <strong>Tầng {{ f.number }}</strong> — {{ f.name }}
+          <br>
+          <a href="{% url 'room_list' f.pk %}">Xem phòng</a>
+          {% if user.is_superuser %}
+             | <a href="{% url 'floor_edit' f.pk %}">Sửa</a>
+             | <a href="{% url 'floor_delete' f.pk %}">Xóa</a>
+          {% endif %}
+        </li>
+      {% empty %}
+        <li>Không có tầng nào trong tòa nhà này.</li>
+      {% endfor %}
+    </ul>
+</div>
 {% endblock %}

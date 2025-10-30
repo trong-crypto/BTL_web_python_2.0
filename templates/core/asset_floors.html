@@ -3,59 +3,157 @@
 {% block title %}{{ building.name }} - Danh sách tầng{% endblock %}
 
 {% block content %}
+<style>
+/* ===== Giao diện màu đỏ hiện đại ===== */
+.container {
+  animation: fadeIn 0.4s ease-in-out;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Tiêu đề chính */
+h2.title {
+  color: #d62828;
+  font-weight: 700;
+  font-size: 1.9rem;
+  margin-bottom: 5px;
+}
+
+.text-muted {
+  color: #6b7280;
+}
+
+/* Card hiển thị tầng */
+.card {
+  border: none;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  transition: all 0.25s ease-in-out;
+}
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 18px rgba(214, 40, 40, 0.2);
+}
+.card-title {
+  font-weight: 600;
+  color: #b91c1c;
+  margin-bottom: 8px;
+}
+.card-text {
+  color: #374151;
+  font-size: 0.95rem;
+}
+
+/* Nút */
+.btn {
+  border-radius: 10px;
+  font-weight: 500;
+  transition: all 0.25s ease-in-out;
+  padding: 8px 16px;
+}
+
+.btn-outline-primary {
+  border: 1px solid #d62828;
+  color: #d62828;
+}
+.btn-outline-primary:hover {
+  background-color: #d62828;
+  color: white;
+}
+
+.btn-outline-secondary {
+  border: 1px solid #9ca3af;
+  color: #6b7280;
+}
+.btn-outline-secondary:hover {
+  background-color: #9ca3af;
+  color: white;
+}
+
+.btn-success {
+  background-color: #dc2626;
+  color: white;
+}
+.btn-success:hover {
+  background-color: #b91c1c;
+}
+
+/* Thông báo */
+.alert-info {
+  background-color: #ffe5e5;
+  border: 1px solid #fca5a5;
+  color: #7f1d1d;
+  border-radius: 10px;
+  padding: 15px;
+  text-align: center;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  h2.title {
+    font-size: 1.5rem;
+  }
+  .card {
+    margin-bottom: 15px;
+  }
+}
+</style>
+
 <div class="container mt-4">
 
-    <!-- Tiêu đề tòa nhà -->
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <div>
-            <h2 class="text-primary mb-1"> {{ building.name }}</h2>
-            <p class="text-muted mb-0"><strong>Mã:</strong> {{ building.code }}</p>
-            {% if building.description %}
-                <p class="text-muted">{{ building.description }}</p>
-            {% endif %}
-        </div>
-
-        <a href="{% url 'asset_hierarchy' %}" class="btn btn-outline-secondary">
-            ← Quay lại danh sách tòa nhà
-        </a>
-
+  <!-- Thông tin tòa nhà -->
+  <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+    <div>
+      <h2 class="title">{{ building.name }}</h2>
+      <p class="text-muted mb-1"><strong>Mã:</strong> {{ building.code }}</p>
+      {% if building.description %}
+        <p class="text-muted">{{ building.description }}</p>
+      {% endif %}
     </div>
 
-    <hr>
-
-    <!-- Danh sách tầng -->
-    <h4 class="mb-3 text-dark"> Danh sách tầng</h4>
-
-    {% if floors %}
-    <div class="row">
-        {% for floor in floors %}
-        <div class="col-md-4 mb-4">
-            <div class="card shadow-sm h-100">
-                <div class="card-body">
-                    <h5 class="card-title text-dark">Tầng {{ floor.name }}</h5>
-                    <p class="card-text"><strong>Mã tầng:</strong> {{ floor.code }}</p>
-                    {% if floor.description %}
-                        <p class="card-text text-muted">{{ floor.description }}</p>
-                    {% endif %}
-                    <a href="{% url 'asset_floor_detail' floor.pk %}" class="btn btn-outline-primary btn-sm">
-                        Xem phòng trong tầng
-                    </a>
-                </div>
-            </div>
-        </div>
-        {% endfor %}
-    </div>
-    {% else %}
-    <div class="alert alert-info">
-        Tòa nhà này chưa có tầng nào được thêm.
-    </div>
-    {% endif %}
-
-    {% if user.is_superuser %}
-    <a href="{% url 'floor_create' building.pk %}" class="btn btn-success mt-3">
-        + Thêm tầng mới
+    <a href="{% url 'asset_hierarchy' %}" class="btn btn-outline-secondary mt-2 mt-md-0">
+      ← Quay lại danh sách tòa nhà
     </a>
-    {% endif %}
+  </div>
+
+  <hr>
+
+  <!-- Danh sách tầng -->
+  <h4 class="mb-3 text-dark fw-semibold">Danh sách tầng</h4>
+
+  {% if floors %}
+  <div class="row">
+    {% for floor in floors %}
+    <div class="col-md-4 mb-4">
+      <div class="card h-100">
+        <div class="card-body">
+          <h5 class="card-title">🏢 Tầng {{ floor.name }}</h5>
+          <p class="card-text"><strong>Mã tầng:</strong> {{ floor.code }}</p>
+          {% if floor.description %}
+            <p class="card-text text-muted">{{ floor.description }}</p>
+          {% endif %}
+          <a href="{% url 'asset_floor_detail' floor.pk %}" class="btn btn-outline-primary btn-sm">
+            Xem phòng trong tầng
+          </a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="alert-info">
+    Tòa nhà này chưa có tầng nào được thêm.
+  </div>
+  {% endif %}
+
+  {% if user.is_superuser %}
+  <a href="{% url 'floor_create' building.pk %}" class="btn btn-success mt-3">
+    ➕ Thêm tầng mới
+  </a>
+  {% endif %}
 
 </div>
 {% endblock %}

@@ -1,85 +1,220 @@
 {% extends 'core/base.html' %}
-
-{% block title %}{{ floor.name }} - Danh sách phòng{% endblock %}
-
 {% block content %}
+<style>
+/* 🌟 Hiệu ứng khi trang load */
+.container {
+  animation: fadeIn 0.4s ease-in-out;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 🎯 Tiêu đề */
+h2.text-primary {
+  font-weight: 700;
+  font-size: 1.8rem;
+  color: #c1121f !important; /* 🔴 Đỏ đậm sang trọng */
+}
+h4.text-dark {
+  font-weight: 600;
+  color: #2b2b2b;
+}
+hr {
+  border-top: 2px solid #ffe5e5;
+  margin: 1rem 0 1.5rem;
+}
+
+/* 📦 Card hiển thị phòng */
+.card {
+  border: none;
+  border-radius: 14px;
+  background-color: #fff5f5; /* 🔴 Nền hồng nhạt nhẹ */
+  box-shadow: 0 3px 10px rgba(193, 18, 31, 0.15);
+  transition: all 0.25s ease-in-out;
+}
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 10px 24px rgba(193, 18, 31, 0.25);
+}
+
+/* 🧾 Tiêu đề trong card */
+.card-title {
+  font-weight: 600;
+  color: #b91c1c;
+  margin-bottom: 8px;
+}
+
+/* ✨ Nút chung */
+.btn {
+  border-radius: 10px;
+  font-size: 0.9rem;
+  padding: 7px 13px;
+  font-weight: 500;
+  transition: all 0.25s ease-in-out;
+}
+
+/* 🔴 Nút chính */
+.btn-danger {
+  background-color: #dc2626;
+  border: none;
+}
+.btn-danger:hover {
+  background-color: #b91c1c;
+}
+
+/* 🔴 Nút viền đỏ */
+.btn-outline-primary {
+  color: #b91c1c;
+  border: 1px solid #b91c1c;
+}
+.btn-outline-primary:hover {
+  background-color: #b91c1c;
+  color: #fff;
+}
+
+/* 🟢 Nút đặt phòng */
+.btn-success {
+  background-color: #ef4444;
+  border: none;
+}
+.btn-success:hover {
+  background-color: #dc2626;
+}
+
+/* 🟡 Nút cập nhật */
+.btn-warning {
+  background-color: #fb923c;
+  border: none;
+  color: #000;
+}
+.btn-warning:hover {
+  background-color: #f97316;
+}
+
+/* ⚙️ Footer card */
+.card-footer {
+  border-top: 1px solid #fbd5d5;
+  background-color: #fff0f0;
+  padding: 10px 14px;
+}
+
+/* 🧱 Alert */
+.alert-info {
+  border: 1px solid #fca5a5;
+  background-color: #ffe5e5;
+  border-radius: 10px;
+  padding: 15px;
+  text-align: center;
+  color: #7f1d1d;
+}
+
+/* 🏷️ Badge trạng thái */
+.badge {
+  font-size: 0.85rem;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-weight: 500;
+}
+.bg-success {
+  background-color: #dc2626 !important; /* 🔴 Đỏ */
+}
+.bg-warning {
+  background-color: #fb923c !important;
+  color: #000 !important;
+}
+.bg-danger {
+  background-color: #7f1d1d !important;
+}
+.bg-secondary {
+  background-color: #a1a1aa !important;
+}
+
+/* 🧩 Nút quay lại */
+.btn-outline-secondary {
+  border-radius: 10px;
+  border-color: #b91c1c;
+  color: #b91c1c;
+}
+.btn-outline-secondary:hover {
+  background-color: #b91c1c;
+  color: #fff;
+}
+
+/* 📱 Responsive */
+@media (max-width: 768px) {
+  .d-flex {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .btn-outline-secondary {
+    margin-top: 10px;
+  }
+}
+</style>
+
 <div class="container mt-4">
-
-    <!-- Thông tin tầng -->
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <div>
-            <h2 class="text-primary mb-1">{{ floor.building.name }}</h2>
-            <h4 class="text-dark mb-1">Tầng: {{ floor.name }}</h4>
-            <p class="text-muted mb-0"><strong>Mã tầng:</strong> {{ floor.code }}</p>
-            {% if floor.description %}
-                <p class="text-muted">{{ floor.description }}</p>
-            {% endif %}
-        </div>
-
-        <a href="{% url 'asset_building_detail' floor.building.pk %}" class="btn btn-outline-secondary">
-            ← Quay lại danh sách tầng
-        </a>
+  <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+    <div>
+      <h2 class="text-primary mb-1">{{ floor.building.name }}</h2>
+      <h4 class="text-dark mb-1">Tầng: {{ floor.name }}</h4>
+      <p class="text-muted mb-0"><strong>Mã tầng:</strong> {{ floor.code }}</p>
+      {% if floor.description %}
+      <p class="text-muted">{{ floor.description }}</p>
+      {% endif %}
     </div>
-
-    <hr>
-
-    <!-- Danh sách phòng -->
-    <h4 class="mb-3 text-dark">🏠 Danh sách phòng</h4>
-
-    {% if rooms %}
-    <div class="row">
-        {% for room in rooms %}
-        <div class="col-md-4 mb-4">
-            <div class="card shadow-sm h-100">
-                <div class="card-body">
-                    <h5 class="card-title text-dark">Phòng {{ room.name }}</h5>
-                    <p class="card-text"><strong>Mã phòng:</strong> {{ room.code }}</p>
-                    
-                    <!-- Hiển thị trạng thái phòng -->
-                    <p class="card-text">
-                        <strong>Trạng thái:</strong> 
-                        <span class="badge 
-                            {% if room.status == 'ready' %}bg-success
-                            {% elif room.status == 'occupied' %}bg-warning
-                            {% elif room.status == 'maintenance' %}bg-danger
-                            {% else %}bg-secondary{% endif %}">
-                            {{ room.get_status_display }}
-                        </span>
-                    </p>
-                    
-                    {% if room.description %}
-                        <p class="card-text text-muted">{{ room.description }}</p>
-                    {% endif %}
-                </div>
-
-                <div class="card-footer bg-light">
-                    <a href="{% url 'asset_room_detail' room.pk %}" class="btn btn-outline-primary btn-sm">
-                        ⚙️ Xem thiết bị
-                    </a>
-                    <a href="{% url 'room_booking_create' room.pk %}" class="btn btn-success btn-sm">
-                        📅 Đặt phòng
-                    </a>
-                    {% if user.is_superuser %}
-                    <a href="{% url 'update_room_status' room.pk %}" class="btn btn-warning btn-sm">
-                        🏷️ Cập nhật trạng thái
-                    </a>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-        {% endfor %}
-    </div>
-    {% else %}
-    <div class="alert alert-info">
-        Tầng này chưa có phòng nào được thêm.
-    </div>
-    {% endif %}
-
-    {% if user.is_superuser %}
-    <a href="{% url 'room_create' floor.pk %}" class="btn btn-success mt-3">
-        + Thêm phòng mới
+    <a href="{% url 'asset_building_detail' floor.building.pk %}" class="btn btn-outline-secondary mt-2 mt-md-0">
+      ← Quay lại danh sách tầng
     </a>
-    {% endif %}
+  </div>
 
+  <hr>
+  <h4 class="mb-3 text-dark">🏠 Danh sách phòng</h4>
+
+  {% if rooms %}
+  <div class="row">
+    {% for room in rooms %}
+    <div class="col-md-4 mb-4">
+      <div class="card h-100">
+        <div class="card-body">
+          <h5 class="card-title">Phòng {{ room.name }}</h5>
+          <p><strong>Mã phòng:</strong> {{ room.code }}</p>
+          <p>
+            <strong>Trạng thái:</strong>
+            <span
+              class="badge {% if room.status == 'ready' %}bg-success{% elif room.status == 'occupied' %}bg-warning{% elif room.status == 'maintenance' %}bg-danger{% else %}bg-secondary{% endif %}">
+              {{ room.get_status_display }}
+            </span>
+          </p>
+          {% if room.description %}
+          <p class="text-muted">{{ room.description }}</p>
+          {% endif %}
+        </div>
+        <div class="card-footer">
+          <a href="{% url 'asset_room_detail' room.pk %}" class="btn btn-outline-primary btn-sm">⚙️ Xem thiết bị</a>
+          <a href="{% url 'room_booking_create' room.pk %}" class="btn btn-success btn-sm">📅 Đặt phòng</a>
+          {% if user.is_superuser %}
+          <a href="{% url 'update_room_status' room.pk %}" class="btn btn-warning btn-sm">🏷️ Cập nhật</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="alert alert-info">
+    Tầng này chưa có phòng nào được thêm.
+  </div>
+  {% endif %}
+
+  {% if user.is_superuser %}
+  <a href="{% url 'room_create' floor.pk %}" class="btn btn-danger mt-3">➕ Thêm phòng mới</a>
+  {% endif %}
 </div>
 {% endblock %}

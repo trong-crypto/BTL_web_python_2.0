@@ -1,11 +1,95 @@
 {% extends 'core/base.html' %}
 {% block content %}
+<style>
+  .building-container {
+    max-width: 900px;
+    margin: 40px auto;
+    background: #fff5f5;
+    border-radius: 12px;
+    padding: 25px 30px;
+    box-shadow: 0 4px 10px rgba(255, 0, 0, 0.1);
+  }
+
+  h2 {
+    text-align: center;
+    color: #c62828;
+    font-weight: bold;
+    margin-bottom: 25px;
+  }
+
+  .button {
+    display: inline-block;
+    background-color: #d32f2f;
+    color: white;
+    text-decoration: none;
+    padding: 10px 16px;
+    border-radius: 8px;
+    transition: 0.3s;
+    margin-bottom: 15px;
+  }
+
+  .button:hover {
+    background-color: #b71c1c;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  th, td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #f0f0f0;
+    text-align: left;
+  }
+
+  th {
+    background-color: #f8d7da;
+    color: #b71c1c;
+  }
+
+  tr:hover {
+    background-color: #ffeaea;
+    transition: 0.2s;
+  }
+
+  td a {
+    text-decoration: none;
+    font-weight: 500;
+    color: #d32f2f;
+    margin: 0 5px;
+    transition: 0.3s;
+  }
+
+  td a:hover {
+    color: #b71c1c;
+    text-decoration: underline;
+  }
+
+  td[colspan="3"] {
+    text-align: center;
+    color: #999;
+    padding: 20px;
+  }
+</style>
+
+<div class="building-container">
   <h2>Danh sách tòa nhà</h2>
   {% if user.is_superuser %}
-    <a class="button" href="{% url 'building_create' %}">Thêm tòa nhà</a>
+    <a class="button" href="{% url 'building_create' %}">+ Thêm tòa nhà</a>
   {% endif %}
   <table>
-    <thead><tr><th>Mã</th><th>Tên</th><th></th></tr></thead>
+    <thead>
+      <tr>
+        <th>Mã</th>
+        <th>Tên</th>
+        <th>Hành động</th>
+      </tr>
+    </thead>
     <tbody>
       {% for b in buildings %}
         <tr>
@@ -23,4 +107,5 @@
       {% endfor %}
     </tbody>
   </table>
+</div>
 {% endblock %}
