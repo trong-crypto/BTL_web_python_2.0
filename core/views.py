@@ -25,6 +25,45 @@ def is_admin(user):
     return user.is_superuser
 
 
+def _expire_old_bookings_for_room(room):
+    """Expire bookings whose end_time has passed and update room status accordingly.
+
+    - APPROVED bookings that finished become COMPLETED
+    - PENDING bookings that expired become REJECTED
+    - If no active (approved/pending) booking remains for the room, set room.status = ROOM_READY
+    This is a best-effort, synchronous cleanup run on page views. For production you should
+    run a periodic task instead.
+    """
+    now = timezone.now()
+    try:
+        expired_qs = RoomBooking.objects.filter(
+            room=room,
+            end_time__lt=now,
+            status__in=[RoomBooking.STATUS_APPROVED, RoomBooking.STATUS_PENDING]
+        )
+        for b in expired_qs:
+            # move approved -> completed, pending -> rejected
+            if b.status == RoomBooking.STATUS_APPROVED:
+                b.status = RoomBooking.STATUS_COMPLETED
+            else:
+                b.status = RoomBooking.STATUS_REJECTED
+            b.save()
+
+        # if there are no active bookings overlapping 'now', mark room ready
+        active_exists = RoomBooking.objects.filter(
+            room=room,
+            status__in=[RoomBooking.STATUS_APPROVED, RoomBooking.STATUS_PENDING],
+            start_time__lte=now,
+            end_time__gte=now
+        ).exists()
+        if not active_exists and room.status != Room.ROOM_READY:
+            room.status = Room.ROOM_READY
+            room.save()
+    except Exception:
+        # don't break page rendering on cleanup errors
+        pass
+
+
 def index(request):
     return redirect('dashboard')
 
@@ -258,6 +297,9 @@ def room_list(request, floor_pk):
     now = timezone.now()
     for r in rooms:
         try:
+            # expire any bookings that already ended for this room
+            _expire_old_bookings_for_room(r)
+
             active = RoomBooking.objects.filter(
                 room=r,
                 status__in=[RoomBooking.STATUS_APPROVED, RoomBooking.STATUS_PENDING],
@@ -465,6 +507,9 @@ def asset_floor_detail(request, pk):
     now = timezone.now()
     for r in rooms:
         try:
+            # expire any bookings that already ended for this room
+            _expire_old_bookings_for_room(r)
+
             active = RoomBooking.objects.filter(
                 room=r,
                 status__in=[RoomBooking.STATUS_APPROVED, RoomBooking.STATUS_PENDING],
@@ -491,6 +536,9 @@ def asset_room_detail(request, pk):
     equipments = room.equipments.all()
     # determine if room has an active approved booking now
     now = timezone.now()
+    # expire any bookings that already ended for this room
+    _expire_old_bookings_for_room(room)
+
     active = RoomBooking.objects.filter(
         room=room,
         status__in=[RoomBooking.STATUS_APPROVED, RoomBooking.STATUS_PENDING],
